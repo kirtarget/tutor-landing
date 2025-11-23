@@ -1,0 +1,32 @@
+{
+  // Автосохранение при потере фокуса
+  "files.autoSave": "onFocusChange",
+
+  // Форматировать при сохранении
+  "editor.formatOnSave": true,
+
+  // Используем Prettier как форматер по умолчанию
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  // Дополнительно: для TS/TSX явно укажем Prettier
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  // Запускать ESLint-фиксы при сохранении
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+
+  // Чтобы ESLint точно работал с TS/JS
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"]
+}
