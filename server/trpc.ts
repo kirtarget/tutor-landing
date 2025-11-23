@@ -11,6 +11,8 @@ export const publicProcedure = t.procedure;
 // ---- Схема входных данных квиза ----
 
 const quizInputSchema = z.object({
+  name: z.string().min(1, "Имя обязательно"),
+  phone: z.string().min(5, "Телефон обязателен"),
   grade: z.string().min(1, "Класс обязателен"),
   subject: z.string().min(1, "Предмет обязателен"),
   goal: z.string().optional(),
@@ -36,6 +38,8 @@ async function sendQuizToTelegram(input: QuizInput) {
   }
 
   const {
+    name,
+    phone,
     grade,
     subject,
     goal,
@@ -47,6 +51,8 @@ async function sendQuizToTelegram(input: QuizInput) {
 
   const lines = [
     "Новая заявка на подбор репетитора (tRPC):",
+    `Имя родителя: ${name}`,
+    `Телефон: ${phone}`,
     `Класс: ${grade}`,
     `Предмет: ${subject}`,
     `Цель: ${goal || "—"}`,
