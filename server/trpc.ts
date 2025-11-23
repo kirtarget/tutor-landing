@@ -31,10 +31,12 @@ async function sendQuizToTelegram(input: QuizInput) {
   const chatId = process.env.TELEGRAM_CHAT_ID;
 
   if (!token || !chatId) {
+    // В проде так делать не стоит, но для MVP лучше не ронять весь API
     console.error(
-      "[tRPC submitQuiz] Missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID env vars"
+      "[tRPC submitQuiz] Missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID env vars. " +
+        "Заявка не отправлена в Telegram, но tRPC вернул ok.",
     );
-    throw new Error("Сервер не сконфигурирован для отправки в Telegram");
+    return; // просто выходим без throw, чтобы ответ tRPC был валидным JSON
   }
 
   const {
@@ -73,7 +75,7 @@ async function sendQuizToTelegram(input: QuizInput) {
         chat_id: chatId,
         text,
       }),
-    }
+    },
   );
 
   if (!response.ok) {
