@@ -16,9 +16,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ru">
-      <body className="min-h-screen bg-slate-50 text-slate-900">
-        <TRPCProvider>{children}</TRPCProvider>
-      </body>
+<body className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-100 text-slate-900">
+  <TRPCProvider>{children}</TRPCProvider>
+</body>
+
     </html>
   );
 }
