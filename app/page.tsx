@@ -824,8 +824,14 @@ export default function Home() {
 
       {/* POPUP КВИЗ */}
       {isQuizOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4">
-          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4"
+          onClick={closeQuiz}
+        >
+          <div
+            className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               type="button"
               onClick={closeQuiz}
@@ -1114,18 +1120,14 @@ export default function Home() {
                           comment: e.target.value,
                         }))
                       }
-                      placeholder='Например: «ребёнок боится контрольных по математике, оценка 3–4, хотим выйти на стабильные 4–5»'
+                      placeholder="Например: «ребёнок боится контрольных по математике, оценка 3–4, хотим выйти на стабильные 4–5»"
                       className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:border-blue-500 focus:ring-1"
                     />
                   </div>
                 </>
               )}
 
-              {error && (
-                <p className="text-xs text-red-600">
-                  {error}
-                </p>
-              )}
+              {error && <p className="text-xs text-red-600">{error}</p>}
 
               {isSuccess && !error && (
                 <p className="text-xs text-emerald-600">
