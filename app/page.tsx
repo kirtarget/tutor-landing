@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { trpc } from "@/trpc/client";
 
 type QuizState = {
   grade: string;
@@ -12,12 +13,8 @@ type QuizState = {
   comment: string;
 };
 
-type Status = "idle" | "loading" | "success" | "error";
-
 export default function Home() {
   const [isQuizOpen, setIsQuizOpen] = useState(false);
-  const [status, setStatus] = useState<Status>("idle");
-  const [error, setError] = useState<string | null>(null);
   const [quiz, setQuiz] = useState<QuizState>({
     grade: "",
     subject: "",
@@ -27,17 +24,21 @@ export default function Home() {
     style: "",
     comment: "",
   });
+  const [error, setError] = useState<string | null>(null);
+
+  const submitQuizMutation = trpc.submitQuiz.useMutation();
 
   const openQuiz = () => {
     setIsQuizOpen(true);
-    setStatus("idle");
     setError(null);
+    submitQuizMutation.reset();
   };
 
-  const closeQuiz = () => {
-    if (status === "loading") return;
-    setIsQuizOpen(false);
-  };
+const closeQuiz = () => {
+  if (submitQuizMutation.isPending) return;
+  setIsQuizOpen(false);
+};
+
 
   const toggleTimeSlot = (value: string) => {
     setQuiz((prev) => {
@@ -51,36 +52,31 @@ export default function Home() {
     });
   };
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
+
     if (!quiz.grade || !quiz.subject) {
       setError("Пожалуйста, выберите класс и предмет.");
       return;
     }
 
-    setStatus("loading");
     setError(null);
-    try {
-      const res = await fetch("/api/quiz", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(quiz),
-      });
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => null);
-        throw new Error(data?.error || "Ошибка отправки заявки");
-      }
-
-      setStatus("success");
-    } catch (err: any) {
-      setStatus("error");
-      setError(err?.message || "Что-то пошло не так. Попробуйте позже.");
-    }
+    submitQuizMutation.mutate(quiz, {
+      onSuccess: () => {
+        // здесь можно сбросить форму или закрыть модалку при желании
+        // setIsQuizOpen(false);
+      },
+      onError: (err) => {
+        setError(err.message || "Что-то пошло не так. Попробуйте позже.");
+      },
+    });
   };
 
-  const isSubmitDisabled =
-    !quiz.grade || !quiz.subject || status === "loading";
+const isLoading = submitQuizMutation.isPending;
+const isSuccess = submitQuizMutation.isSuccess;
+const isSubmitDisabled = !quiz.grade || !quiz.subject || isLoading;
+
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -408,10 +404,7 @@ export default function Home() {
         </section>
 
         {/* ФОРМАТ И ПРЕДМЕТЫ */}
-        <section
-          id="formats"
-          className="bg-white py-12 md:py-16"
-        >
+        <section id="formats" className="bg-white py-12 md:py-16">
           <div className="mx-auto grid max-w-5xl gap-8 px-4 md:grid-cols-2">
             <div>
               <h2 className="text-xl font-bold md:text-2xl">
@@ -722,7 +715,9 @@ export default function Home() {
         {/* БЕЗОПАСНОСТЬ */}
         <section id="safety" className="bg-cyan-50 py-12 md:py-16">
           <div className="mx-auto max-w-5xl px-4">
-            <h2 className="text-xl font-bold md:text-2xl">Безопасность и качество</h2>
+            <h2 className="text-xl font-bold md:text-2xl">
+              Безопасность и качество
+            </h2>
             <div className="mt-6 grid gap-4 md:grid-cols-3">
               {[
                 {
@@ -811,9 +806,7 @@ export default function Home() {
               ×
             </button>
 
-            <h2 className="text-xl font-bold">
-              Подбор онлайн-репетитора
-            </h2>
+            <h2 className="text-xl font-bold">Подбор онлайн-репетитора</h2>
             <p className="mt-1 text-sm text-slate-600">
               Ответьте на несколько вопросов о ребёнке и учебных целях. На
               основе ответов мы сможем подобрать подходящего онлайн-репетитора
@@ -1042,10 +1035,10 @@ export default function Home() {
                 </p>
               )}
 
-              {status === "success" && (
+              {isSuccess && !error && (
                 <p className="text-xs text-emerald-600">
-                  Заявка отправлена. Мы свяжемся с вами после обработки
-                  ответа в Telegram-боте.
+                  Заявка отправлена. Мы свяжемся с вами после обработки ответа в
+                  Telegram-боте.
                 </p>
               )}
 
@@ -1059,13 +1052,12 @@ export default function Home() {
                       : "bg-blue-600 hover:bg-blue-700"
                   }`}
                 >
-                  {status === "loading"
-                    ? "Отправляем..."
-                    : "Оставить заявку"}
+                  {isLoading ? "Отправляем..." : "Оставить заявку"}
+
                 </button>
                 <p className="text-xs text-slate-500">
-                  В боевой версии к заявке добавим контакт родителя
-                  (телефон или мессенджер).
+                  В боевой версии к заявке добавим контакт родителя (телефон или
+                  мессенджер).
                 </p>
               </div>
             </form>
