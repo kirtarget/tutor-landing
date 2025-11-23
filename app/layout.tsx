@@ -1,14 +1,12 @@
-import "./globals.css";
+// app/layout.tsx
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-
-const inter = Inter({ subsets: ["latin", "cyrillic"] });
+import "./globals.css";
+import { TRPCProvider } from "@/trpc/Provider";
 
 export const metadata: Metadata = {
-  title:
-    "Онлайн-репетиторы для школьников 5–11 классов | Подбор репетитора по предметам",
+  title: "Маркетплейс онлайн-репетиторов для 5–11 классов",
   description:
-    "Сервис подбора онлайн-репетиторов для школьников 5–11 классов. Найдите репетитора по математике, русскому, английскому и другим предметам для ОГЭ и ЕГЭ. Пробный урок, прозрачные цены, контроль прогресса и удобный личный кабинет родителя.",
+    "Подбор онлайн-репетитора для школьников 5–11 классов: математика, русский, английский и другие предметы. Пробный урок уже на этой неделе.",
 };
 
 export default function RootLayout({
@@ -18,8 +16,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ru">
-      <body className={`${inter.className} bg-slate-50 text-slate-900`}>
-        {children}
+      <body className="min-h-screen bg-slate-50 text-slate-900">
+        <TRPCProvider>{children}</TRPCProvider>
       </body>
     </html>
   );
