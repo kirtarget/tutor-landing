@@ -86,7 +86,7 @@ export default function Home() {
 
       submitQuizMutation.mutate(quiz, {
         onSuccess: () => {
-          // Можно сбросить только шаг и показать успех
+          // При желании можно закрывать модалку:
           // setIsQuizOpen(false);
         },
         onError: (err) => {
@@ -273,14 +273,553 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Дальше лендинг без изменений... (как у тебя был) */}
-        {/* --- Я ТВОЙ НИЖНИЙ КОНТЕНТ НЕ МЕНЯЛ, ОН ОСТАЁТСЯ --- */}
-        {/* Чтобы не раздувать ответ ещё сильнее, предполагаем, что ниже у тебя тот же код секций.
-            Важно: в конце main оставляем только обновлённый POPUP-КВИЗ, см. ниже. */}
+        {/* КАК ЭТО РАБОТАЕТ */}
+        <section id="how-it-works" className="py-12 md:py-16">
+          <div className="mx-auto max-w-5xl px-4">
+            <h2 className="text-xl font-bold md:text-2xl">
+              Как работает сервис подбора онлайн-репетитора
+            </h2>
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
+              {[
+                {
+                  title: "Квиз за 2 минуты",
+                  text: "Указываете класс, предмет, цель и удобное время — всё онлайн.",
+                },
+                {
+                  title: "Подбор 8–12 репетиторов",
+                  text: "Смотрим опыт, стиль объяснения, отзывы и расписание преподавателей.",
+                },
+                {
+                  title: "Выбор преподавателя",
+                  text: "Сразу видите цену, описание, отзывы и свободные слоты.",
+                },
+                {
+                  title: "Пробный урок",
+                  text: "Проверяете, как ребёнку с репетитором, и оцениваете уровень.",
+                },
+                {
+                  title: "Регулярные занятия",
+                  text: "Онлайн-уроки, гибкий график, удобные отмены и оплата только за проведённые занятия.",
+                },
+              ].map((step, i) => (
+                <div
+                  key={step.title}
+                  className="flex flex-col rounded-2xl bg-white p-4 shadow-sm"
+                >
+                  <div className="mb-2 flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-xs font-semibold text-white">
+                    {i + 1}
+                  </div>
+                  <h3 className="text-sm font-semibold">{step.title}</h3>
+                  <p className="mt-1 text-xs text-slate-600">{step.text}</p>
+                </div>
+              ))}
+            </div>
 
-        {/* ... остальные секции ленда (как в предыдущем варианте) ... */}
-        {/* Я сокращаю, но ты просто оставляешь свои секции "Как это работает", "Преимущества", и т.д. */}
+            <div className="mt-6 flex flex-col items-start justify-between gap-3 rounded-2xl bg-blue-50 p-4 text-sm md:flex-row md:items-center">
+              <p className="text-slate-700">
+                Готовы начать подбор? Это займёт пару минут.
+              </p>
+              <button
+                onClick={openQuiz}
+                className="inline-flex items-center justify-center rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
+              >
+                Подобрать репетитора
+              </button>
+            </div>
+          </div>
+        </section>
 
+        {/* ПРЕИМУЩЕСТВА */}
+        <section id="advantages" className="bg-white py-12 md:py-16">
+          <div className="mx-auto max-w-5xl px-4">
+            <h2 className="text-xl font-bold md:text-2xl">
+              Преимущества сервиса подбора онлайн-репетиторов для школьников
+            </h2>
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                {
+                  title: "Преподаватель под характер ребёнка",
+                  text: "Спокойный, строгий, быстрый темп, больше практики или объяснений — подбираем формат, в котором ребёнку комфортно.",
+                  accent: true,
+                },
+                {
+                  title: "Проверенные репетиторы",
+                  text: "Проверяем образование, опыт и качество уроков у каждого преподавателя.",
+                },
+                {
+                  title: "Точный подбор под цель",
+                  text: "Квиз → 8–12 подходящих специалистов вместо хаотичного поиска по объявлениям.",
+                },
+                {
+                  title: "Прозрачные профили",
+                  text: "Сразу видно цену, опыт, отзывы и доступное расписание, без бесконечных переписок.",
+                },
+                {
+                  title: "Онлайн-доска и конспекты",
+                  text: "Занятия проходят онлайн, после каждого урока остаётся конспект.",
+                },
+                {
+                  title: "Оплата внутри сервиса",
+                  text: "Без переводов на карту и путаницы — все оплаты в одном месте.",
+                },
+                {
+                  title: "Контроль прогресса",
+                  text: "Личный кабинет родителя и еженедельная сводка в WhatsApp.",
+                },
+                {
+                  title: "Удобные отмены и замена репетитора",
+                  text: "Если формат не подошёл — подберём другого, будущие оплаты сохраняются.",
+                },
+              ].map((item) => (
+                <div
+                  key={item.title}
+                  className={`flex flex-col rounded-2xl p-4 shadow-sm ${
+                    item.accent
+                      ? "border border-blue-600 bg-blue-50/60"
+                      : "bg-white"
+                  }`}
+                >
+                  <h3 className="text-sm font-semibold">{item.title}</h3>
+                  <p className="mt-1 text-xs text-slate-600">{item.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ОТЛИЧИЯ ОТ ОНЛАЙН-ШКОЛ */}
+        <section id="vs-schools" className="py-12 md:py-16">
+          <div className="mx-auto max-w-5xl px-4">
+            <h2 className="text-xl font-bold md:text-2xl">
+              Чем формат занятий с онлайн-репетитором отличается от онлайн-школ
+            </h2>
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                {
+                  title: "Только индивидуальные уроки",
+                  text: "Преподаватель работает с одним ребёнком, а не с потоком.",
+                },
+                {
+                  title: "Программа под ребёнка",
+                  text: "Можно менять темп и акценты по ходу года, а не идти по жёсткому курсу.",
+                },
+                {
+                  title: "Гибкий график",
+                  text: "Вы выбираете удобное время и переносите занятия при необходимости.",
+                },
+                {
+                  title: "Оплата за уроки, а не за пакеты",
+                  text: "Никаких подписок и обязательных пакетов на месяц вперёд.",
+                },
+                {
+                  title: "Прямой контакт с преподавателем",
+                  text: "Все вопросы по учёбе обсуждаются сразу с репетитором, без “прослоек”.",
+                },
+                {
+                  title: "Живой отчёт по прогрессу",
+                  text: "Виден реальный материал и темы, а не формальный отчёт раз в месяц.",
+                },
+              ].map((item) => (
+                <div
+                  key={item.title}
+                  className="flex flex-col rounded-2xl bg-white p-4 shadow-sm"
+                >
+                  <h3 className="text-sm font-semibold">{item.title}</h3>
+                  <p className="mt-1 text-xs text-slate-600">{item.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ФОРМАТ И ПРЕДМЕТЫ */}
+        <section id="formats" className="bg-white py-12 md:py-16">
+          <div className="mx-auto grid max-w-5xl gap-8 px-4 md:grid-cols-2">
+            <div>
+              <h2 className="text-xl font-bold md:text-2xl">
+                Формат онлайн-занятий с репетиторами
+              </h2>
+              <ul className="mt-4 space-y-2 text-sm text-slate-700">
+                <li>• Индивидуальные онлайн-уроки 45–60 минут.</li>
+                <li>• Интенсивы перед контрольными и экзаменами.</li>
+                <li>• Диагностика и план на 4–8 недель.</li>
+              </ul>
+            </div>
+            <div>
+              <h2 className="text-xl font-bold md:text-2xl">
+                Предметы, по которым можно подобрать онлайн-репетитора
+              </h2>
+              <div className="mt-4 flex flex-wrap gap-2 text-xs">
+                {[
+                  "Математика",
+                  "Русский",
+                  "Английский",
+                  "Физика",
+                  "Химия",
+                  "Биология",
+                  "Информатика",
+                  "ОГЭ / ЕГЭ",
+                ].map((p) => (
+                  <span
+                    key={p}
+                    className="rounded-full bg-blue-50 px-3 py-1 text-blue-700"
+                  >
+                    {p}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* КОМУ ПОДХОДИТ */}
+        <section id="who-for" className="py-12 md:py-16">
+          <div className="mx-auto max-w-5xl px-4">
+            <h2 className="text-xl font-bold md:text-2xl">
+              Кому подойдёт сервис подбора репетитора для 5–11 классов
+            </h2>
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                {
+                  title: "Ученикам 5–8 классов",
+                  text: "Нужно подтянуть предмет и снизить стресс с домашкой.",
+                },
+                {
+                  title: "Девятиклассникам",
+                  text: "Подготовка к ОГЭ и закрытие пробелов перед старшей школой.",
+                },
+                {
+                  title: "10–11 класс",
+                  text: "Подготовка к ЕГЭ под целевые баллы и поступление.",
+                },
+                {
+                  title: "Родителям, которым важен контроль",
+                  text: "Хочется понимать, что происходит на уроках и как идёт прогресс.",
+                },
+              ].map((item) => (
+                <div
+                  key={item.title}
+                  className="flex flex-col rounded-2xl bg-white p-4 shadow-sm"
+                >
+                  <h3 className="text-sm font-semibold">{item.title}</h3>
+                  <p className="mt-1 text-xs text-slate-600">{item.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ПОЧЕМУ УДОБНО И ВЫГОДНО */}
+        <section id="benefits" className="bg-white py-12 md:py-16">
+          <div className="mx-auto max-w-5xl px-4">
+            <h2 className="text-xl font-bold md:text-2xl">
+              Почему заниматься с онлайн-репетитором удобно и выгодно
+            </h2>
+            <div className="mt-6 grid gap-6 md:grid-cols-2">
+              <ul className="space-y-2 text-sm text-slate-700">
+                <li>• Экономия времени — подбор занимает несколько минут.</li>
+                <li>
+                  • Быстрый старт — часто можно начать уже в течение 1 дня с
+                  подходящим репетитором.
+                </li>
+                <li>• Оплата внутри сервиса — без переводов на карту.</li>
+                <li>
+                  • Только нужные уроки — оплачиваются только проведённые
+                  занятия.
+                </li>
+              </ul>
+              <ul className="space-y-2 text-sm text-slate-700">
+                <li>
+                  • Контроль прогресса — личный кабинет + сводка в WhatsApp по
+                  онлайн-занятиям.
+                </li>
+                <li>
+                  • Конспекты после каждого урока — удобно повторять материал с
+                  репетитором.
+                </li>
+                <li>• Замена преподавателя без потерь по будущим урокам.</li>
+                <li>
+                  • Пробный урок — можно “проверить химию” без долгих
+                  обязательств.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* ИСТОРИИ СЕМЕЙ */}
+        <section id="stories" className="py-12 md:py-16">
+          <div className="mx-auto max-w-5xl px-4">
+            <h2 className="text-xl font-bold md:text-2xl">
+              Истории семей, которые нашли онлайн-репетитора через сервис
+            </h2>
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
+              {/* 1 */}
+              <div className="flex flex-col rounded-2xl bg-white p-4 shadow-sm">
+                <div className="mb-2 h-16 w-16 rounded-xl bg-blue-50 p-2">
+                  <svg
+                    viewBox="0 0 64 64"
+                    className="h-full w-full"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <rect
+                      x="8"
+                      y="10"
+                      width="48"
+                      height="36"
+                      rx="6"
+                      fill="#e0ecff"
+                    />
+                    <polyline
+                      points="14,32 26,24 36,30 50,20"
+                      fill="none"
+                      stroke="#22c55e"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <line
+                      x1="14"
+                      y1="40"
+                      x2="26"
+                      y2="40"
+                      stroke="#2563eb"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-sm font-semibold">
+                  Онлайн-репетитор по математике, 6 класс
+                </h3>
+                <p className="mt-1 text-xs text-slate-600">
+                  Было: 3 и слёзы над ДЗ. <br />
+                  Стало: стабильные 4–5 после занятий с онлайн-репетитором по
+                  математике.
+                </p>
+              </div>
+              {/* 2 */}
+              <div className="flex flex-col rounded-2xl bg-white p-4 shadow-sm">
+                <div className="mb-2 h-16 w-16 rounded-xl bg-blue-50 p-2">
+                  <svg
+                    viewBox="0 0 64 64"
+                    className="h-full w-full"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <rect
+                      x="10"
+                      y="14"
+                      width="44"
+                      height="30"
+                      rx="4"
+                      fill="#e0ecff"
+                    />
+                    <rect
+                      x="14"
+                      y="18"
+                      width="20"
+                      height="4"
+                      rx="2"
+                      fill="#2563eb"
+                    />
+                    <rect
+                      x="14"
+                      y="26"
+                      width="26"
+                      height="3"
+                      rx="1.5"
+                      fill="#a5b4fc"
+                    />
+                    <rect
+                      x="14"
+                      y="32"
+                      width="18"
+                      height="3"
+                      rx="1.5"
+                      fill="#a5b4fc"
+                    />
+                    <circle cx="44" cy="32" r="6" fill="#22c55e" />
+                  </svg>
+                </div>
+                <h3 className="text-sm font-semibold">
+                  Онлайн-репетитор по русскому языку, 9 класс (ОГЭ)
+                </h3>
+                <p className="mt-1 text-xs text-slate-600">
+                  Было: 17 баллов на диагностике. <br />
+                  Стало: 27–29 баллов на пробниках после занятий с репетитором
+                  по русскому.
+                </p>
+              </div>
+              {/* 3 */}
+              <div className="flex flex-col rounded-2xl bg-white p-4 shadow-sm">
+                <div className="mb-2 h-16 w-16 rounded-xl bg-blue-50 p-2">
+                  <svg
+                    viewBox="0 0 64 64"
+                    className="h-full w-full"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <rect
+                      x="8"
+                      y="12"
+                      width="48"
+                      height="34"
+                      rx="6"
+                      fill="#e0ecff"
+                    />
+                    <polyline
+                      points="14,38 26,30 34,34 50,24"
+                      fill="none"
+                      stroke="#2563eb"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <line
+                      x1="14"
+                      y1="20"
+                      x2="24"
+                      y2="20"
+                      stroke="#f97316"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-sm font-semibold">
+                  Профильная математика, 11 класс — онлайн-репетитор
+                </h3>
+                <p className="mt-1 text-xs text-slate-600">
+                  Было: 48 баллов. <br />
+                  Стало: 70+ после регулярных онлайн-занятий с репетитором по
+                  профильной математике.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* НАШИ ПРЕПОДАВАТЕЛИ */}
+        <section id="tutors" className="bg-white py-12 md:py-16">
+          <div className="mx-auto max-w-5xl px-4">
+            <h2 className="text-xl font-bold md:text-2xl">
+              Наши онлайн-репетиторы
+            </h2>
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
+              {[
+                {
+                  name: "Мария, математика",
+                  meta: "Онлайн-репетитор по математике, 10 лет опыта, готовит к ОГЭ и ЕГЭ",
+                  color: "bg-blue-600",
+                },
+                {
+                  name: "Алексей, русский",
+                  meta: "Онлайн-репетитор по русскому языку, 8 лет опыта, эксперт по сочинениям",
+                  color: "bg-orange-500",
+                },
+                {
+                  name: "Екатерина, английский",
+                  meta: "Онлайн-репетитор по английскому, 7 лет опыта, разговорная практика",
+                  color: "bg-emerald-500",
+                },
+              ].map((tutor) => (
+                <div
+                  key={tutor.name}
+                  className="flex flex-col rounded-2xl bg-white p-4 shadow-sm"
+                >
+                  <div
+                    className={`mb-2 h-16 w-16 rounded-full ${tutor.color}`}
+                  ></div>
+                  <h3 className="text-sm font-semibold">{tutor.name}</h3>
+                  <p className="mt-1 text-xs text-slate-600">{tutor.meta}</p>
+                </div>
+              ))}
+            </div>
+            <p className="mt-4 text-xs text-slate-500">
+              На платформе — десятки проверенных онлайн-репетиторов по школьным
+              предметам и подготовке к экзаменам.
+            </p>
+          </div>
+        </section>
+
+        {/* БЕЗОПАСНОСТЬ */}
+        <section id="safety" className="bg-cyan-50 py-12 md:py-16">
+          <div className="mx-auto max-w-5xl px-4">
+            <h2 className="text-xl font-bold md:text-2xl">
+              Безопасность и качество
+            </h2>
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
+              {[
+                {
+                  title: "Проверка преподавателей",
+                  text: "Документы, опыт и тестовые уроки — перед стартом работы на платформе.",
+                },
+                {
+                  title: "Безопасная оплата",
+                  text: "Все платежи проходят внутри сервиса, без личных переводов.",
+                },
+                {
+                  title: "Материалы и история онлайн-занятий",
+                  text: "Конспекты и пройденные темы с онлайн-репетитором всегда доступны в личном кабинете.",
+                },
+                {
+                  title: "Понятные правила отмены",
+                  text: "Если предупредить заранее, урок переносится без потерь.",
+                },
+                {
+                  title: "Поддержка сервиса",
+                  text: "Поможем, если возник вопрос с уроком, оплатой или расписанием.",
+                },
+              ].map((item) => (
+                <div
+                  key={item.title}
+                  className="flex flex-col rounded-2xl bg-white p-4 shadow-sm"
+                >
+                  <h3 className="text-sm font-semibold">{item.title}</h3>
+                  <p className="mt-1 text-xs text-slate-600">{item.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ДЛЯ РЕПЕТИТОРОВ */}
+        <section
+          id="for-tutors"
+          className="border-t border-slate-200 bg-white py-4"
+        >
+          <div className="mx-auto flex max-w-5xl flex-col items-start gap-3 px-4 text-sm md:flex-row md:items-center md:justify-between">
+            <p className="text-slate-700">
+              Вы онлайн-репетитор и хотите вести учеников 5–11 классов по
+              школьным предметам и подготовке к ОГЭ и ЕГЭ через платформу?
+            </p>
+            <button className="inline-flex items-center justify-center rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">
+              Стать репетитором
+            </button>
+          </div>
+        </section>
+
+        {/* ФИНАЛЬНЫЙ CTA */}
+        <section className="bg-slate-900 py-12 md:py-16">
+          <div className="mx-auto max-w-5xl px-4 text-center text-slate-50">
+            <h2 className="text-2xl font-bold md:text-3xl">
+              Начните подбор онлайн-репетитора для школьника уже сегодня
+            </h2>
+            <p className="mx-auto mt-3 max-w-xl text-sm text-slate-300 md:text-base">
+              Ответьте на 5–7 вопросов — мы подберём 8–12 подходящих
+              онлайн-репетиторов по нужным предметам. Пробный онлайн-урок уже на
+              этой неделе.
+            </p>
+            <button
+              onClick={openQuiz}
+              className="mt-6 inline-flex items-center justify-center rounded-full bg-blue-500 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-600"
+            >
+              Подобрать репетитора
+            </button>
+            <p className="mt-3 text-xs text-slate-400">
+              После заполнения квиза заявка приходит в командный Telegram-бот.
+            </p>
+          </div>
+        </section>
       </main>
 
       {/* POPUP КВИЗ */}
