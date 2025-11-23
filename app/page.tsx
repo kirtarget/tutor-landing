@@ -26,9 +26,86 @@ export default function Home() {
           </div>
 
           <div className="hero-visual">
-            {/* ЗАГЛУШКА ДЛЯ ИЗОБРАЖЕНИЯ */}
-            <div className="placeholder hero-placeholder">
-              Иллюстрация: родитель и ребёнок за ноутбуком / репетитор онлайн
+            {/* SVG-иконка вместо заглушки */}
+            <div className="hero-illustration" aria-hidden="true">
+              <svg
+                viewBox="0 0 160 110"
+                className="hero-svg"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <rect
+                  x="12"
+                  y="20"
+                  width="136"
+                  height="70"
+                  rx="10"
+                  fill="#e0ecff"
+                />
+                <rect
+                  x="22"
+                  y="30"
+                  width="70"
+                  height="38"
+                  rx="6"
+                  fill="#2563eb"
+                />
+                <rect
+                  x="100"
+                  y="30"
+                  width="35"
+                  height="8"
+                  rx="4"
+                  fill="#ffffff"
+                  opacity="0.9"
+                />
+                <rect
+                  x="100"
+                  y="44"
+                  width="35"
+                  height="8"
+                  rx="4"
+                  fill="#ffffff"
+                  opacity="0.6"
+                />
+                <rect
+                  x="100"
+                  y="58"
+                  width="28"
+                  height="8"
+                  rx="4"
+                  fill="#ffffff"
+                  opacity="0.4"
+                />
+                {/* Ребёнок */}
+                <circle cx="40" cy="50" r="10" fill="#f97316" />
+                <rect
+                  x="32"
+                  y="60"
+                  width="16"
+                  height="12"
+                  rx="4"
+                  fill="#fbbf24"
+                />
+                {/* Репетитор */}
+                <circle cx="70" cy="50" r="10" fill="#34d399" />
+                <rect
+                  x="62"
+                  y="60"
+                  width="16"
+                  height="12"
+                  rx="4"
+                  fill="#22c55e"
+                />
+                {/* Нижняя планка ноутбука */}
+                <rect
+                  x="40"
+                  y="92"
+                  width="80"
+                  height="8"
+                  rx="4"
+                  fill="#cbd5f5"
+                />
+              </svg>
             </div>
 
             <div className="hero-card">
@@ -286,9 +363,38 @@ export default function Home() {
           <h2 className="section-title">Истории семей</h2>
           <div className="cards-grid">
             <div className="card">
-              {/* ЗАГЛУШКА ДЛЯ ИЗОБРАЖЕНИЯ */}
-              <div className="placeholder-small">
-                Фото дневника / оценок “до/после”
+              <div className="case-icon" aria-hidden="true">
+                <svg
+                  viewBox="0 0 64 64"
+                  className="case-svg"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    x="8"
+                    y="10"
+                    width="48"
+                    height="36"
+                    rx="6"
+                    fill="#e0ecff"
+                  />
+                  <polyline
+                    points="14,32 26,24 36,30 50,20"
+                    fill="none"
+                    stroke="#22c55e"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <line
+                    x1="14"
+                    y1="40"
+                    x2="26"
+                    y2="40"
+                    stroke="#2563eb"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
               </div>
               <h3 className="card-title">Математика, 6 класс</h3>
               <p className="card-text">
@@ -297,7 +403,47 @@ export default function Home() {
               </p>
             </div>
             <div className="card">
-              <div className="placeholder-small">Фото ученика за уроком</div>
+              <div className="case-icon" aria-hidden="true">
+                <svg
+                  viewBox="0 0 64 64"
+                  className="case-svg"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    x="10"
+                    y="14"
+                    width="44"
+                    height="30"
+                    rx="4"
+                    fill="#e0ecff"
+                  />
+                  <rect
+                    x="14"
+                    y="18"
+                    width="20"
+                    height="4"
+                    rx="2"
+                    fill="#2563eb"
+                  />
+                  <rect
+                    x="14"
+                    y="26"
+                    width="26"
+                    height="3"
+                    rx="1.5"
+                    fill="#a5b4fc"
+                  />
+                  <rect
+                    x="14"
+                    y="32"
+                    width="18"
+                    height="3"
+                    rx="1.5"
+                    fill="#a5b4fc"
+                  />
+                  <circle cx="44" cy="32" r="6" fill="#22c55e" />
+                </svg>
+              </div>
               <h3 className="card-title">Русский язык, 9 класс (ОГЭ)</h3>
               <p className="card-text">
                 Было: 17 баллов на диагностике. <br />
@@ -305,7 +451,39 @@ export default function Home() {
               </p>
             </div>
             <div className="card">
-              <div className="placeholder-small">Скрин результатов пробника</div>
+              <div className="case-icon" aria-hidden="true">
+                <svg
+                  viewBox="0 0 64 64"
+                  className="case-svg"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    x="8"
+                    y="12"
+                    width="48"
+                    height="34"
+                    rx="6"
+                    fill="#e0ecff"
+                  />
+                  <polyline
+                    points="14,38 26,30 34,34 50,24"
+                    fill="none"
+                    stroke="#2563eb"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <line
+                    x1="14"
+                    y1="20"
+                    x2="24"
+                    y2="20"
+                    stroke="#f97316"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
               <h3 className="card-title">Профильная математика, 11 класс</h3>
               <p className="card-text">
                 Было: 48 баллов. <br />
@@ -322,8 +500,22 @@ export default function Home() {
           <h2 className="section-title">Наши преподаватели</h2>
           <div className="tutors-grid">
             <div className="tutor-card">
-              {/* ЗАГЛУШКА ДЛЯ ФОТО ПРЕПОДАВАТЕЛЯ */}
-              <div className="placeholder-avatar">Фото преподавателя</div>
+              <div className="tutor-avatar-icon" aria-hidden="true">
+                <svg
+                  viewBox="0 0 64 64"
+                  className="tutor-avatar-svg"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle cx="32" cy="24" r="12" fill="#2563eb" />
+                  <path
+                    d="M16 46c2.5-7 8-11 16-11s13.5 4 16 11"
+                    fill="none"
+                    stroke="#2563eb"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
               <h3 className="tutor-name">Мария, математика</h3>
               <p className="tutor-meta">10 лет опыта, готовит к ОГЭ и ЕГЭ</p>
               <p className="tutor-text">
@@ -331,7 +523,22 @@ export default function Home() {
               </p>
             </div>
             <div className="tutor-card">
-              <div className="placeholder-avatar">Фото преподавателя</div>
+              <div className="tutor-avatar-icon" aria-hidden="true">
+                <svg
+                  viewBox="0 0 64 64"
+                  className="tutor-avatar-svg"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle cx="32" cy="24" r="12" fill="#f97316" />
+                  <path
+                    d="M16 46c2.5-7 8-11 16-11s13.5 4 16 11"
+                    fill="none"
+                    stroke="#f97316"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
               <h3 className="tutor-name">Алексей, русский</h3>
               <p className="tutor-meta">8 лет опыта, эксперт по сочинениям</p>
               <p className="tutor-text">
@@ -339,7 +546,22 @@ export default function Home() {
               </p>
             </div>
             <div className="tutor-card">
-              <div className="placeholder-avatar">Фото преподавателя</div>
+              <div className="tutor-avatar-icon" aria-hidden="true">
+                <svg
+                  viewBox="0 0 64 64"
+                  className="tutor-avatar-svg"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle cx="32" cy="24" r="12" fill="#22c55e" />
+                  <path
+                    d="M16 46c2.5-7 8-11 16-11s13.5 4 16 11"
+                    fill="none"
+                    stroke="#22c55e"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
               <h3 className="tutor-name">Екатерина, английский</h3>
               <p className="tutor-meta">7 лет опыта, разговорная практика</p>
               <p className="tutor-text">

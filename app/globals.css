@@ -9,7 +9,7 @@ body {
   padding: 0;
   margin: 0;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #f7f8fb;
+  background: #f5f7fb; /* мягкий фон */
   color: #111827;
   scroll-behavior: smooth;
 }
@@ -42,7 +42,7 @@ a {
 }
 
 .safety {
-  background: #ecfeff;
+  background: #ecfeff; /* мягкий мятный для блока безопасн. */
 }
 
 .final-cta {
@@ -59,7 +59,6 @@ a {
   font-size: 28px;
   font-weight: 700;
   margin-bottom: 32px;
-  text-align: left;
 }
 
 /* HERO */
@@ -124,55 +123,41 @@ a {
   align-items: center;
 }
 
-/* ЗАГЛУШКИ ДЛЯ ИЗОБРАЖЕНИЙ */
+/* SVG-иллюстрации */
 
-.placeholder {
-  border-radius: 16px;
-  border: 1px dashed #d1d5db;
-  background: #f3f4f6;
-  padding: 24px;
-  font-size: 13px;
-  color: #9ca3af;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.hero-placeholder {
+.hero-illustration {
   width: 100%;
   max-width: 360px;
-  height: 220px;
 }
 
-.placeholder-small {
-  border-radius: 12px;
-  border: 1px dashed #d1d5db;
-  background: #f3f4f6;
-  padding: 12px;
-  font-size: 12px;
-  color: #9ca3af;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100px;
+.hero-svg {
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
-.placeholder-avatar {
-  border-radius: 999px;
-  border: 1px dashed #d1d5db;
-  background: #f3f4f6;
-  padding: 10px;
-  font-size: 12px;
-  color: #9ca3af;
-  text-align: center;
+.case-icon {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 12px;
+}
+
+.case-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.tutor-avatar-icon {
   width: 72px;
   height: 72px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+}
+
+.tutor-avatar-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 /* HERO card */
@@ -212,7 +197,7 @@ a {
 }
 
 .button-primary {
-  background: #2563eb;
+  background: #2563eb; /* основной синий */
   color: #ffffff;
 }
 
@@ -240,7 +225,6 @@ a {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 16px;
-  justify-items: stretch;
 }
 
 .cards-grid-2 {
@@ -471,7 +455,7 @@ a {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(247, 248, 251, 0.95);
+  background: rgba(245, 247, 251, 0.95);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid #e5e7eb;
 }
@@ -606,10 +590,6 @@ a {
     padding: 56px 16px;
   }
 
-  .section-title {
-    text-align: left;
-  }
-
   .header-inner {
     gap: 12px;
   }
@@ -624,13 +604,13 @@ a {
 }
 
 @media (max-width: 640px) {
-  .hero-inner {
-    gap: 24px;
-  }
-
   .hero {
     padding-top: 72px;
     padding-bottom: 56px;
+  }
+
+  .hero-inner {
+    gap: 24px;
   }
 
   .hero-title {
