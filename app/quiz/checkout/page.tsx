@@ -97,8 +97,26 @@ export default function CheckoutPage() {
     }
   };
 
+  const isGradeFilled = Boolean(formData.grade?.trim());
+  const subjectValue =
+    formData.subject === "Другое"
+      ? formData.subjectOther?.trim()
+      : formData.subject?.trim();
+  const isSubjectFilled = Boolean(subjectValue);
+  const hasRequiredQuizData = isGradeFilled && isSubjectFilled;
+
   const validate = (): boolean => {
     const nextErrors: Record<string, string> = {};
+
+    if (!isGradeFilled) {
+      nextErrors.grade = "Выберите класс на шаге «Запрос»";
+    }
+    if (!isSubjectFilled) {
+      nextErrors.subject =
+        formData.subject === "Другое"
+          ? "Укажите предмет в поле «Другое» на шаге «Запрос»"
+          : "Выберите предмет на шаге «Запрос»";
+    }
 
     if (!formData.parentName?.trim()) {
       nextErrors.parentName = "Укажите имя";
@@ -111,6 +129,11 @@ export default function CheckoutPage() {
     }
     if (!formData.paymentMethod) {
       nextErrors.paymentMethod = "Выберите способ оплаты";
+    }
+
+    if (!hasRequiredQuizData) {
+      nextErrors.prerequisite =
+        "Заполните обязательные вопросы на предыдущих шагах, чтобы продолжить.";
     }
 
     setErrors(nextErrors);
@@ -183,6 +206,7 @@ export default function CheckoutPage() {
 
   const isLoading = submitQuizMutation.isPending;
   const isSuccess = submitQuizMutation.isSuccess;
+  const isSubmitDisabled = isLoading || isSuccess || !hasRequiredQuizData;
   const canSwitchTutor = recommendations.length > 1;
   const topTutors = recommendations.slice(0, 6);
 
@@ -228,6 +252,15 @@ export default function CheckoutPage() {
                       Онлайн-формат
                     </span>
                   </div>
+                  {(!hasRequiredQuizData || errors.grade || errors.subject) && (
+                    <p className="text-sm text-red-600">
+                      {[errors.grade, errors.subject].filter(Boolean).length > 0
+                        ? [errors.grade, errors.subject]
+                            .filter(Boolean)
+                            .join(" ")
+                        : "Заполните класс и предмет на предыдущих шагах, чтобы продолжить."}
+                    </p>
+                  )}
                   <div>
                     <label className="mb-2 block text-sm font-semibold text-slate-700">
                       Удобное время для пробного урока
@@ -462,12 +495,19 @@ export default function CheckoutPage() {
                 </div>
               )}
 
+              {(!hasRequiredQuizData || errors.prerequisite) && (
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                  {errors.prerequisite ||
+                    "Заполните класс и предмет на предыдущих шагах, чтобы продолжить."}
+                </div>
+              )}
+
               <button
                 type="button"
                 onClick={handleSubmit}
-                disabled={isLoading || isSuccess}
+                disabled={isSubmitDisabled}
                 className={`w-full rounded-full px-8 py-4 text-base font-semibold text-white shadow-lg transition-all ${
-                  isLoading || isSuccess
+                  isSubmitDisabled
                     ? "cursor-not-allowed bg-slate-400"
                     : "bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 hover:shadow-xl hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                 }`}
@@ -476,7 +516,9 @@ export default function CheckoutPage() {
                   ? "Отправляем…"
                   : isSuccess
                     ? "Заявка отправлена"
-                    : "Привязать карту и записаться"}
+                    : !hasRequiredQuizData
+                      ? "Заполните предыдущие шаги"
+                      : "Привязать карту и записаться"}
               </button>
 
               <p className="text-center text-xs text-slate-500">

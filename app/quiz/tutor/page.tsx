@@ -9,6 +9,9 @@ import {
   type QuizFormData,
 } from "@/lib/quiz-state";
 
+type PriceRange = NonNullable<QuizFormData["priceRange"]>;
+type TeachingExperience = NonNullable<QuizFormData["tutorTeachingExperience"]>;
+
 export default function TutorPage() {
   const router = useRouter();
   const [formData, setFormData] = useState<QuizFormData>({});
@@ -19,7 +22,7 @@ export default function TutorPage() {
 
     // Автоматически устанавливаем опыт преподавания на основе стоимости
     if (state.priceRange && !state.tutorTeachingExperience) {
-      const experienceMap: Record<string, string> = {
+      const experienceMap: Record<PriceRange, TeachingExperience> = {
         budget: "beginner",
         medium: "3-5",
         premium: "5+",
@@ -28,7 +31,7 @@ export default function TutorPage() {
 
       const suggestedExperience = experienceMap[state.priceRange];
       if (suggestedExperience) {
-        const updated = {
+        const updated: QuizFormData = {
           ...state,
           tutorTeachingExperience: suggestedExperience,
         };
@@ -43,20 +46,21 @@ export default function TutorPage() {
 
     // При изменении опыта преподавания обновляем стоимость
     if (field === "tutorTeachingExperience") {
-      const priceMap: Record<string, string> = {
+      const priceMap: Record<TeachingExperience, PriceRange> = {
         beginner: "budget",
         "3-5": "medium",
         "5+": "premium",
         any: "all",
       };
 
-      const suggestedPrice = priceMap[value];
+      const experienceValue = value as TeachingExperience;
+      const suggestedPrice = priceMap[experienceValue];
       if (suggestedPrice) {
-        updated.priceRange = suggestedPrice as any;
+        updated.priceRange = suggestedPrice;
       }
 
       // Если выбран не "3-5" и не "5+", сбрасываем галочку экспертов
-      if (value !== "3-5" && value !== "5+") {
+      if (experienceValue !== "3-5" && experienceValue !== "5+") {
         updated.tutorOgeEgeExpert = false;
       }
     }
@@ -111,14 +115,13 @@ export default function TutorPage() {
     let priceRange = formData.priceRange;
 
     if (formData.tutorTeachingExperience && !priceRange) {
-      const experienceToPrice: Record<string, string> = {
+      const experienceToPrice: Record<TeachingExperience, PriceRange> = {
         beginner: "budget",
         "3-5": formData.tutorOgeEgeExpert ? "premium" : "medium",
         "5+": "premium",
         any: "all",
       };
-      priceRange =
-        experienceToPrice[formData.tutorTeachingExperience] || priceRange;
+      priceRange = experienceToPrice[formData.tutorTeachingExperience];
     } else if (formData.tutorTeachingExperience === "3-5" && priceRange) {
       // Обновляем стоимость на основе галочки экспертов
       if (formData.tutorOgeEgeExpert && priceRange !== "premium") {
