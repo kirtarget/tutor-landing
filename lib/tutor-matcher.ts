@@ -5,6 +5,7 @@ import type { QuizFormData } from "./quiz-state";
 export type QuizAnswers = {
   grade?: number;
   subject?: TutorCard["subject"];
+  subjectLabel?: string;
   goals?: string[];
   difficulties?: string[];
   pricePreference?: "low" | "mid" | "high";
@@ -47,9 +48,15 @@ const experienceRank: Record<
 };
 
 export function mapQuizToAnswers(formData: QuizFormData): QuizAnswers {
+  const subjectLabel =
+    formData.subject === "Другое"
+      ? formData.subjectOther?.trim()
+      : formData.subject?.trim();
+
   return {
     grade: extractGrade(formData.grade),
-    subject: normalizeSubject(formData.subject),
+    subject: normalizeSubject(formData.subject, formData.subjectOther),
+    subjectLabel: subjectLabel || undefined,
     goals: formData.goals || [],
     difficulties: formData.difficulties || [],
     pricePreference: mapPricePreference(formData.priceRange),
@@ -86,6 +93,7 @@ function applyFilters(
   answers: QuizAnswers,
 ): TutorCard[] {
   let result = allTutors;
+  const hasSubjectPreference = Boolean(answers.subjectLabel);
 
   if (answers.subject) {
     const bySubject = allTutors.filter(
@@ -94,6 +102,8 @@ function applyFilters(
     if (bySubject.length) {
       result = bySubject;
     }
+  } else if (hasSubjectPreference) {
+    return [];
   }
 
   if (answers.grade) {
@@ -200,9 +210,32 @@ function mapStyles(values?: string[]): QuizAnswers["stylePreferences"] {
   return mapped.length ? Array.from(new Set(mapped)) : undefined;
 }
 
-function normalizeSubject(subject?: string): TutorCard["subject"] | undefined {
+function normalizeSubject(
+  subject?: string,
+  customSubject?: string,
+): TutorCard["subject"] | undefined {
   if (!subject) return undefined;
-  return subjectMap[subject];
+
+  const rawCandidate =
+    subject === "Другое" ? customSubject?.trim() : subject.trim();
+  if (!rawCandidate) return undefined;
+
+  const normalizedCandidate = rawCandidate.toLowerCase();
+
+  for (const [label, slug] of Object.entries(subjectMap)) {
+    if (label.toLowerCase() === normalizedCandidate) {
+      return slug;
+    }
+  }
+
+  const slugMatch = Object.values(subjectMap).find(
+    (value) => value === normalizedCandidate,
+  );
+  if (slugMatch) {
+    return slugMatch;
+  }
+
+  return undefined;
 }
 
 function extractGrade(raw?: string): number | undefined {

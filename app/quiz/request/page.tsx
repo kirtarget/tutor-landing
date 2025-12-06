@@ -32,38 +32,39 @@ export default function RequestPage() {
     }
   };
 
-  const validate = (): boolean => {
-    const newErrors: Record<string, string> = {};
+  const validate = (): Record<string, string> => {
+    const nextErrors: Record<string, string> = {};
 
     if (!formData.lessonType) {
-      newErrors.lessonType = "Выберите вид занятий";
+      nextErrors.lessonType = "Выберите вид занятий";
     }
     if (!formData.grade) {
-      newErrors.grade = "Выберите класс";
+      nextErrors.grade = "Выберите класс";
     }
     if (!formData.subject) {
-      newErrors.subject = "Выберите предмет";
+      nextErrors.subject = "Выберите предмет";
     }
     if (formData.subject === "Другое" && !formData.subjectOther?.trim()) {
-      newErrors.subjectOther = "Уточните предмет";
+      nextErrors.subjectOther = "Уточните предмет";
     }
     if (!formData.goals || formData.goals.length === 0) {
-      newErrors.goals = "Выберите хотя бы одну цель";
+      nextErrors.goals = "Выберите хотя бы одну цель";
     }
     if (!formData.priceRange) {
-      newErrors.priceRange = "Выберите диапазон стоимости";
+      nextErrors.priceRange = "Выберите диапазон стоимости";
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors(nextErrors);
+    return nextErrors;
   };
 
   const handleNext = () => {
-    if (validate()) {
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length === 0) {
       router.push("/quiz/tutor");
     } else {
       // Скролл к первой ошибке
-      const firstErrorField = Object.keys(errors)[0];
+      const firstErrorField = Object.keys(validationErrors)[0];
       if (firstErrorField) {
         document
           .getElementById(firstErrorField)
