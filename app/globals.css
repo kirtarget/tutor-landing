@@ -10,7 +10,7 @@ body,
   * {
     @apply antialiased;
   }
-  
+
   body {
     @apply bg-white;
   }
@@ -20,11 +20,15 @@ body,
   .animate-fade-in {
     animation: fadeIn 0.5s ease-in-out;
   }
-  
+
   .animate-slide-up {
     animation: slideUp 0.5s ease-out;
   }
-  
+
+  .animate-pulse-gentle {
+    animation: pulse-gentle 1.5s ease-in-out infinite;
+  }
+
   @keyframes fadeIn {
     from {
       opacity: 0;
@@ -33,7 +37,7 @@ body,
       opacity: 1;
     }
   }
-  
+
   @keyframes slideUp {
     from {
       opacity: 0;
@@ -44,9 +48,20 @@ body,
       transform: translateY(0);
     }
   }
-  
+
+  @keyframes pulse-gentle {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.8;
+    }
+  }
+
   @keyframes blob-float {
-    0%, 100% {
+    0%,
+    100% {
       transform: translate(0, 0) scale(1);
     }
     33% {
@@ -56,79 +71,134 @@ body,
       transform: translate(-20px, 20px) scale(0.9);
     }
   }
-  
+
   .blob {
     will-change: transform;
   }
-  
+
   .blob-1 {
     animation: blob-float-1 20s ease-in-out infinite;
     transform: translateY(var(--parallax-y, 0px));
   }
-  
+
   .blob-2 {
     animation: blob-float-2 25s ease-in-out infinite reverse;
     transform: translateY(var(--parallax-y, 0px));
   }
-  
+
   .blob-3 {
     animation: blob-float-3 30s ease-in-out infinite;
     transform: translateY(var(--parallax-y, 0px));
   }
-  
+
   .blob-4 {
     animation: blob-float-4 22s ease-in-out infinite reverse;
     transform: translateY(var(--parallax-y, 0px));
   }
-  
+
   .blob-5 {
     animation: blob-float-5 28s ease-in-out infinite;
     transform: translateY(var(--parallax-y, 0px));
   }
-  
+
   @keyframes blob-float-1 {
-    0%, 100% { transform: translate(0, 0) scale(1) translateY(var(--parallax-y, 0px)); }
-    33% { transform: translate(30px, -50px) scale(1.1) translateY(var(--parallax-y, 0px)); }
-    66% { transform: translate(-20px, 20px) scale(0.9) translateY(var(--parallax-y, 0px)); }
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1) translateY(var(--parallax-y, 0px));
+    }
+    33% {
+      transform: translate(30px, -50px) scale(1.1)
+        translateY(var(--parallax-y, 0px));
+    }
+    66% {
+      transform: translate(-20px, 20px) scale(0.9)
+        translateY(var(--parallax-y, 0px));
+    }
   }
-  
+
   @keyframes blob-float-2 {
-    0%, 100% { transform: translate(0, 0) scale(1) translateY(var(--parallax-y, 0px)); }
-    33% { transform: translate(-30px, 50px) scale(1.1) translateY(var(--parallax-y, 0px)); }
-    66% { transform: translate(20px, -20px) scale(0.9) translateY(var(--parallax-y, 0px)); }
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1) translateY(var(--parallax-y, 0px));
+    }
+    33% {
+      transform: translate(-30px, 50px) scale(1.1)
+        translateY(var(--parallax-y, 0px));
+    }
+    66% {
+      transform: translate(20px, -20px) scale(0.9)
+        translateY(var(--parallax-y, 0px));
+    }
   }
-  
+
   @keyframes blob-float-3 {
-    0%, 100% { transform: translate(0, 0) scale(1) translateY(var(--parallax-y, 0px)); }
-    33% { transform: translate(40px, -30px) scale(1.05) translateY(var(--parallax-y, 0px)); }
-    66% { transform: translate(-25px, 30px) scale(0.95) translateY(var(--parallax-y, 0px)); }
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1) translateY(var(--parallax-y, 0px));
+    }
+    33% {
+      transform: translate(40px, -30px) scale(1.05)
+        translateY(var(--parallax-y, 0px));
+    }
+    66% {
+      transform: translate(-25px, 30px) scale(0.95)
+        translateY(var(--parallax-y, 0px));
+    }
   }
-  
+
   @keyframes blob-float-4 {
-    0%, 100% { transform: translate(0, 0) scale(1) translateY(var(--parallax-y, 0px)); }
-    33% { transform: translate(-40px, 30px) scale(1.05) translateY(var(--parallax-y, 0px)); }
-    66% { transform: translate(25px, -30px) scale(0.95) translateY(var(--parallax-y, 0px)); }
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1) translateY(var(--parallax-y, 0px));
+    }
+    33% {
+      transform: translate(-40px, 30px) scale(1.05)
+        translateY(var(--parallax-y, 0px));
+    }
+    66% {
+      transform: translate(25px, -30px) scale(0.95)
+        translateY(var(--parallax-y, 0px));
+    }
   }
-  
+
   @keyframes blob-float-5 {
-    0%, 100% { transform: translate(0, 0) scale(1) translateY(var(--parallax-y, 0px)); }
-    33% { transform: translate(25px, -40px) scale(1.08) translateY(var(--parallax-y, 0px)); }
-    66% { transform: translate(-30px, 25px) scale(0.92) translateY(var(--parallax-y, 0px)); }
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1) translateY(var(--parallax-y, 0px));
+    }
+    33% {
+      transform: translate(25px, -40px) scale(1.08)
+        translateY(var(--parallax-y, 0px));
+    }
+    66% {
+      transform: translate(-30px, 25px) scale(0.92)
+        translateY(var(--parallax-y, 0px));
+    }
   }
-  
+
   /* Скрытие скроллбара для горизонтальной прокрутки на мобильных */
   .overflow-x-auto {
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE и Edge */
   }
-  
+
   .overflow-x-auto::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Opera */
   }
-  
+
   /* Плавная прокрутка */
   .overflow-x-auto {
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
+  }
+
+  /* Скрытие скроллбара (утилита) */
+  .scrollbar-hide {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE и Edge */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
   }
 }

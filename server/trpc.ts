@@ -91,7 +91,7 @@ async function sendQuizToTelegram(input: QuizInput) {
     `   Предмет: ${subject}`,
     "",
     "🎯 Цель занятий:",
-    `   ${goal ? goalLabels[goal] || goal : "—"}`,
+    `   ${goal || "—"}`,
     "",
     "📅 Формат занятий:",
     `   Частота: ${frequency ? frequencyLabels[frequency] || frequency : "—"}`,
@@ -102,7 +102,7 @@ async function sendQuizToTelegram(input: QuizInput) {
     }`,
     "",
     "👨‍🏫 Стиль преподавателя:",
-    `   ${style ? styleLabels[style] || style : "—"}`,
+    `   ${style || "—"}`,
   ];
 
   if (comment) {
