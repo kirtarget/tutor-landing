@@ -207,6 +207,13 @@ export default function CheckoutPage() {
   const isLoading = submitQuizMutation.isPending;
   const isSuccess = submitQuizMutation.isSuccess;
   const isSubmitDisabled = isLoading || isSuccess || !hasRequiredQuizData;
+  const isNoCardPayment = formData.paymentMethod === "no-card";
+  const primaryCtaLabel = (() => {
+    if (isLoading) return "Отправляем…";
+    if (isSuccess) return "Заявка отправлена";
+    if (!hasRequiredQuizData) return "Заполните предыдущие шаги";
+    return isNoCardPayment ? "Оставить заявку" : "Привязать карту и записаться";
+  })();
   const canSwitchTutor = recommendations.length > 1;
   const topTutors = recommendations.slice(0, 6);
 
@@ -408,7 +415,7 @@ export default function CheckoutPage() {
                 </h3>
                 <p className="text-sm text-slate-500">
                   {selectedTutor
-                    ? `Мы зарезервируем ${selectedTutor.name} сразу после оплаты.`
+                    ? "Точные дату и время первого урока вы сможете выбрать на следующем шаге."
                     : "После оплаты координатор подберёт преподавателя по вашим ответам."}
                 </p>
               </div>
@@ -512,13 +519,7 @@ export default function CheckoutPage() {
                     : "bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 hover:shadow-xl hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                 }`}
               >
-                {isLoading
-                  ? "Отправляем…"
-                  : isSuccess
-                    ? "Заявка отправлена"
-                    : !hasRequiredQuizData
-                      ? "Заполните предыдущие шаги"
-                      : "Привязать карту и записаться"}
+                {primaryCtaLabel}
               </button>
 
               <p className="text-center text-xs text-slate-500">
