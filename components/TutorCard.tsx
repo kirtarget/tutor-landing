@@ -8,6 +8,7 @@ type TutorCardProps = {
   isRecommended?: boolean;
   onChangeClick?: () => void;
   tone?: "raised" | "flat";
+  badgeLabel?: string;
 };
 
 export const TutorCard: React.FC<TutorCardProps> = ({
@@ -15,6 +16,7 @@ export const TutorCard: React.FC<TutorCardProps> = ({
   isRecommended = false,
   onChangeClick,
   tone = "raised",
+  badgeLabel = "Рекомендован",
 }) => {
   const {
     name,
@@ -50,6 +52,7 @@ export const TutorCard: React.FC<TutorCardProps> = ({
           grades={grades}
           theme={avatarTheme}
           showBadge={isRecommended}
+          badgeLabel={badgeLabel}
         />
 
         <div className="space-y-4 px-6 pb-6 pt-4">
@@ -125,6 +128,7 @@ type TutorPhotoProps = {
   grades: TutorCardType["grades"];
   theme: TutorCardType["avatarTheme"];
   showBadge: boolean;
+  badgeLabel: string;
 };
 
 const TutorPhoto: React.FC<TutorPhotoProps> = ({
@@ -133,6 +137,7 @@ const TutorPhoto: React.FC<TutorPhotoProps> = ({
   grades,
   theme,
   showBadge,
+  badgeLabel,
 }) => {
   const palette = photoPalette[theme];
   const initials = name
@@ -147,8 +152,8 @@ const TutorPhoto: React.FC<TutorPhotoProps> = ({
       className={`relative overflow-hidden rounded-[28px] bg-gradient-to-br ${palette.bg} px-6 pb-6 pt-6 text-white`}
     >
       {showBadge && (
-        <span className="absolute left-6 top-6 inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white">
-          Рекомендован
+        <span className="absolute left-6 top-6 inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold tracking-wide text-white">
+          {badgeLabel}
         </span>
       )}
 

@@ -28,13 +28,44 @@ export default function CheckoutPage() {
     [],
   );
   const [selectedTutorId, setSelectedTutorId] = useState<string | null>(null);
+  const PHONE_PATTERN = /^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/;
   const phoneInputRef = useRef<HTMLInputElement>(null);
+  const persistedStateRef = useRef<QuizFormData>(getQuizState());
 
   const submitQuizMutation = trpc.submitQuiz.useMutation();
 
   useEffect(() => {
-    setFormData(getQuizState());
+    const state = getQuizState();
+    const normalized: QuizFormData = {
+      ...state,
+      priceRange: state.priceRange === "all" ? "any" : state.priceRange,
+      notificationChannels:
+        state.notificationChannels ||
+        (state.notificationsEnabled ? ["whatsapp"] : []),
+    };
+    setFormData(normalized);
   }, []);
+
+  useEffect(() => {
+    const stored = persistedStateRef.current;
+    if (
+      (!formData.grade || !formData.subject) &&
+      (stored.grade || stored.subject)
+    ) {
+      const merged: QuizFormData = {
+        ...formData,
+        grade: formData.grade || stored.grade,
+        subject: formData.subject || stored.subject,
+        subjectOther:
+          formData.subjectOther ||
+          (formData.subject === "Другое"
+            ? formData.subjectOther
+            : stored.subjectOther),
+      };
+      setFormData(merged);
+      saveQuizState(merged);
+    }
+  }, [formData.grade, formData.subject]);
 
   useEffect(() => {
     const answers = mapQuizToAnswers(formData);
@@ -54,6 +85,64 @@ export default function CheckoutPage() {
     }
   }, [recommendations]);
 
+  const buildPreferredTimeOptions = () => {
+    const options: { value: string; label: string }[] = [];
+    const days = formData.scheduleDays || [];
+    const hasMorning = days.includes("weekday-morning");
+    const hasAfternoon = days.includes("weekday-afternoon");
+    const hasEvening = days.includes("weekday-evening");
+    const hasWeekend = days.includes("weekend");
+
+    if (hasMorning) {
+      options.push({
+        value: "weekday-morning",
+        label: "Ближайший будний день до обеда",
+      });
+    }
+    if (hasAfternoon) {
+      options.push({
+        value: "weekday-afternoon",
+        label: "Ближайший будний день 16:00–19:00",
+      });
+    }
+    if (hasEvening) {
+      options.push({
+        value: "weekday-evening",
+        label: "Ближайший будний вечер",
+      });
+    }
+    if (hasWeekend) {
+      options.push(
+        { value: "weekend-morning", label: "Ближайшие выходные утром" },
+        { value: "weekend-day", label: "Ближайшие выходные днём" },
+      );
+    }
+    if (hasMorning || hasAfternoon || hasEvening || hasWeekend) {
+      options.push({
+        value: "next-week",
+        label: "Следующая неделя в выбранное время",
+      });
+    }
+
+    options.push({
+      value: "discuss",
+      label: "Обсудить время с координатором",
+    });
+
+    const deduped = options.filter(
+      (option, index, self) =>
+        index === self.findIndex((o) => o.value === option.value),
+    );
+
+    return deduped.length
+      ? deduped
+      : [
+          { value: "weekday-evening", label: "Ближайший будний вечер" },
+          { value: "weekend-day", label: "Ближайшие выходные днём" },
+          { value: "discuss", label: "Обсудить время с координатором" },
+        ];
+  };
+
   const updateField = (field: keyof QuizFormData, value: any) => {
     const updated = { ...formData, [field]: value };
     setFormData(updated);
@@ -66,6 +155,37 @@ export default function CheckoutPage() {
       });
     }
   };
+
+  const toggleNotificationChannel = (
+    channel: "whatsapp" | "telegram" | "sms",
+    checked: boolean,
+  ) => {
+    const current = formData.notificationChannels || [];
+    const next = checked
+      ? Array.from(new Set([...current, channel]))
+      : current.filter((item) => item !== channel);
+    updateField("notificationChannels", next);
+  };
+
+  const preferredTimeOptions = useMemo(
+    () => buildPreferredTimeOptions(),
+    [formData.scheduleDays],
+  );
+
+  useEffect(() => {
+    if (!preferredTimeOptions.length) return;
+    const hasCurrent = preferredTimeOptions.some(
+      (option) => option.value === formData.preferredTime,
+    );
+    if (hasCurrent) return;
+    const fallback =
+      preferredTimeOptions.find(
+        (option) => option.value === "weekday-evening",
+      ) || preferredTimeOptions[0];
+    if (fallback) {
+      updateField("preferredTime", fallback.value);
+    }
+  }, [preferredTimeOptions, formData.preferredTime]);
 
   const formatPhoneNumber = (value: string) => {
     const numbers = value.replace(/\D/g, "");
@@ -97,43 +217,26 @@ export default function CheckoutPage() {
     }
   };
 
-  const isGradeFilled = Boolean(formData.grade?.trim());
-  const subjectValue =
-    formData.subject === "Другое"
-      ? formData.subjectOther?.trim()
-      : formData.subject?.trim();
-  const isSubjectFilled = Boolean(subjectValue);
-  const hasRequiredQuizData = isGradeFilled && isSubjectFilled;
-
   const validate = (): boolean => {
     const nextErrors: Record<string, string> = {};
-
-    if (!isGradeFilled) {
-      nextErrors.grade = "Выберите класс на шаге «Запрос»";
-    }
-    if (!isSubjectFilled) {
-      nextErrors.subject =
-        formData.subject === "Другое"
-          ? "Укажите предмет в поле «Другое» на шаге «Запрос»"
-          : "Выберите предмет на шаге «Запрос»";
-    }
 
     if (!formData.parentName?.trim()) {
       nextErrors.parentName = "Укажите имя";
     }
     if (
       !formData.parentPhone?.trim() ||
-      formData.parentPhone.replace(/\D/g, "").length < 10
+      !PHONE_PATTERN.test(formData.parentPhone)
     ) {
-      nextErrors.parentPhone = "Укажите корректный номер телефона";
+      nextErrors.parentPhone = "Введите номер в формате +7 (999) 123-45-67";
     }
     if (!formData.paymentMethod) {
       nextErrors.paymentMethod = "Выберите способ оплаты";
     }
-
-    if (!hasRequiredQuizData) {
-      nextErrors.prerequisite =
-        "Заполните обязательные вопросы на предыдущих шагах, чтобы продолжить.";
+    if (
+      formData.parentEmail &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.parentEmail)
+    ) {
+      nextErrors.parentEmail = "Введите корректный e-mail";
     }
 
     setErrors(nextErrors);
@@ -146,16 +249,20 @@ export default function CheckoutPage() {
     const quizData = {
       name: formData.parentName || "",
       phone: formData.parentPhone || "",
-      grade: formData.grade || "",
+      grade: formData.grade || persistedStateRef.current.grade || "",
       subject:
-        formData.subject === "Другое"
-          ? formData.subjectOther || ""
-          : formData.subject || "",
+        (formData.subject || persistedStateRef.current.subject) === "Другое"
+          ? formData.subjectOther ||
+            persistedStateRef.current.subjectOther ||
+            ""
+          : formData.subject || persistedStateRef.current.subject || "",
       goal: formData.goals?.join(", ") || "",
       frequency: formData.frequency || "",
       timeSlots: formData.scheduleDays || [],
+      preferredTime: formData.preferredTime || "",
       style: formData.teachingStyle?.join(", ") || "",
       comment: formData.additionalComment || "",
+      notifications: formData.notificationChannels || [],
     };
 
     submitQuizMutation.mutate(quizData, {
@@ -172,19 +279,22 @@ export default function CheckoutPage() {
   };
 
   const getSubjectDisplay = () => {
-    if (formData.subject === "Другое" && formData.subjectOther) {
-      return formData.subjectOther;
+    const subjectCandidate =
+      formData.subject || persistedStateRef.current.subject || "";
+    const subjectOtherCandidate =
+      formData.subjectOther || persistedStateRef.current.subjectOther || "";
+
+    if (subjectCandidate === "Другое" && subjectOtherCandidate) {
+      return subjectOtherCandidate;
     }
-    return formData.subject || "—";
+    return subjectCandidate || "—";
   };
 
+  const getGradeDisplay = () =>
+    formData.grade || persistedStateRef.current.grade || "Класс не выбран";
+
   const getLessonTypeDisplay = () => {
-    const types: Record<string, string> = {
-      individual: "Индивидуальные",
-      "mini-group": "Мини-группа 2–3 человека",
-      "not-sure": "Подберём вариант",
-    };
-    return formData.lessonType ? types[formData.lessonType] || "—" : "—";
+    return "Индивидуальные";
   };
 
   const selectedTutor = useMemo(
@@ -200,20 +310,79 @@ export default function CheckoutPage() {
     ? `Стоимость пробного урока у ${selectedTutor.name}`
     : "Стоимость уточним после выбора репетитора";
 
+  const goalLabelsMap: Record<string, string> = {
+    "stable-grades": "Стабильные оценки",
+    understanding: "Понимание темы",
+    "less-conflicts": "Меньше конфликтов с домашкой",
+    oge: "Подготовка к ОГЭ",
+    ege: "Подготовка к ЕГЭ",
+    tests: "Контрольные/ДВИ",
+    "strong-school": "Поступление в сильную школу",
+    university: "Поступление в вуз",
+    "general-understanding": "Разобраться в предмете",
+  };
+
+  const getGoalsDisplay = () => {
+    if (!formData.goals?.length) return "—";
+    const labels = formData.goals
+      .map((goal) => goalLabelsMap[goal] || goal)
+      .filter(Boolean);
+    if (labels.length === 1) return labels[0];
+    if (labels.length === 2) return labels.join(" · ");
+    return `${labels[0]} + ещё ${labels.length - 1}`;
+  };
+
+  const scheduleMap: Record<string, string> = {
+    "weekday-morning": "Будни до обеда",
+    "weekday-afternoon": "Будни после школы",
+    "weekday-evening": "Будни вечером",
+    weekend: "Выходные",
+  };
+
+  const getScheduleDisplay = () => {
+    if (!formData.scheduleDays?.length) return "—";
+    const labels = formData.scheduleDays
+      .map((item) => scheduleMap[item] || item)
+      .filter(Boolean);
+    return labels.length ? labels.join(", ") : "—";
+  };
+
+  const frequencyMap: Record<string, string> = {
+    "1w": "1 раз в неделю",
+    "2w": "2 раза в неделю",
+    intensive: "Интенсив перед экзаменом",
+    "not-sure": "Нужна рекомендация",
+  };
+
+  const getFrequencyDisplay = () =>
+    formData.frequency ? frequencyMap[formData.frequency] || "—" : "—";
+
+  const priceDisplayMap: Record<string, string> = {
+    budget: "Недорогие (900–1200 ₽)",
+    medium: "Оптимальный баланс (1200–1700 ₽)",
+    premium: "Максимальный результат (1800–2500 ₽)",
+    any: "Рассмотреть все варианты",
+  };
+
+  const getPriceRangeDisplay = () => {
+    if (formData.priceRange && priceDisplayMap[formData.priceRange]) {
+      return priceDisplayMap[formData.priceRange];
+    }
+    return fallbackPrice ? `~${fallbackPrice}` : "—";
+  };
+
   const heroText = selectedTutor
     ? `Мы зарезервировали ${selectedTutor.name}. При желании можно посмотреть других преподавателей перед оплатой.`
     : "Подтвердите заявку, и мы предложим репетитора по вашим ответам — оплатить урок можно после выбора.";
 
   const isLoading = submitQuizMutation.isPending;
   const isSuccess = submitQuizMutation.isSuccess;
-  const isSubmitDisabled = isLoading || isSuccess || !hasRequiredQuizData;
-  const isNoCardPayment = formData.paymentMethod === "no-card";
-  const primaryCtaLabel = (() => {
-    if (isLoading) return "Отправляем…";
-    if (isSuccess) return "Заявка отправлена";
-    if (!hasRequiredQuizData) return "Заполните предыдущие шаги";
-    return isNoCardPayment ? "Оставить заявку" : "Привязать карту и записаться";
-  })();
+  const isSubmitDisabled =
+    isLoading ||
+    isSuccess ||
+    !formData.parentName?.trim() ||
+    !PHONE_PATTERN.test(formData.parentPhone || "") ||
+    !formData.paymentMethod;
   const canSwitchTutor = recommendations.length > 1;
   const topTutors = recommendations.slice(0, 6);
 
@@ -250,7 +419,7 @@ export default function CheckoutPage() {
                   </div>
                   <div className="flex flex-wrap gap-2 text-xs font-medium text-slate-700">
                     <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1">
-                      {formData.grade || "Класс не выбран"}
+                      {getGradeDisplay()}
                     </span>
                     <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1">
                       {getLessonTypeDisplay()}
@@ -259,15 +428,6 @@ export default function CheckoutPage() {
                       Онлайн-формат
                     </span>
                   </div>
-                  {(!hasRequiredQuizData || errors.grade || errors.subject) && (
-                    <p className="text-sm text-red-600">
-                      {[errors.grade, errors.subject].filter(Boolean).length > 0
-                        ? [errors.grade, errors.subject]
-                            .filter(Boolean)
-                            .join(" ")
-                        : "Заполните класс и предмет на предыдущих шагах, чтобы продолжить."}
-                    </p>
-                  )}
                   <div>
                     <label className="mb-2 block text-sm font-semibold text-slate-700">
                       Удобное время для пробного урока
@@ -279,14 +439,12 @@ export default function CheckoutPage() {
                       }
                       className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base outline-none transition-all focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20"
                     >
-                      <option value="">Выберите время</option>
-                      <option value="weekday-evening">
-                        Ближайший будний вечер
-                      </option>
-                      <option value="weekend">Ближайшие выходные</option>
-                      <option value="discuss">
-                        Обсудить время с координатором
-                      </option>
+                      <option value="">Выберите удобное время</option>
+                      {preferredTimeOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </section>
@@ -304,8 +462,11 @@ export default function CheckoutPage() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
                       <label className="mb-2 block text-sm font-semibold text-slate-700">
-                        Имя родителя
+                        Имя родителя или ученика
                       </label>
+                      <p className="text-xs text-slate-500 mb-2">
+                        Если ребёнку больше 16, можно указать его имя.
+                      </p>
                       <input
                         id="parentName"
                         type="text"
@@ -324,8 +485,11 @@ export default function CheckoutPage() {
                     </div>
                     <div>
                       <label className="mb-2 block text-sm font-semibold text-slate-700">
-                        Телефон
+                        Номер телефона
                       </label>
+                      <p className="text-xs text-slate-500 mb-2">
+                        Формат: +7 (999) 123-45-67
+                      </p>
                       <input
                         id="parentPhone"
                         ref={phoneInputRef}
@@ -347,7 +511,7 @@ export default function CheckoutPage() {
 
                   <div>
                     <label className="mb-2 block text-sm font-semibold text-slate-700">
-                      E-mail (опционально)
+                      E-mail для чеков (необязательно)
                     </label>
                     <input
                       type="email"
@@ -358,30 +522,98 @@ export default function CheckoutPage() {
                       placeholder="email@example.com"
                       className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base outline-none transition-all focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20"
                     />
+                    {errors.parentEmail && (
+                      <p className="mt-2 text-sm text-red-600">
+                        {errors.parentEmail}
+                      </p>
+                    )}
                   </div>
 
-                  <label className="flex cursor-pointer items-center gap-3">
-                    <input
-                      type="checkbox"
-                      checked={formData.notificationsEnabled || false}
-                      onChange={(e) =>
-                        updateField("notificationsEnabled", e.target.checked)
-                      }
-                      className="h-4 w-4 text-sky-500 focus:ring-2 focus:ring-sky-500"
-                    />
-                    <span className="text-sm text-slate-700">
-                      Получать напоминания о занятиях в WhatsApp/Telegram
-                    </span>
-                  </label>
+                  <div className="space-y-2">
+                    <p className="text-sm font-semibold text-slate-700">
+                      Получать напоминания о занятиях
+                    </p>
+                    <div className="flex flex-wrap gap-3">
+                      {[
+                        { value: "whatsapp", label: "WhatsApp" },
+                        { value: "telegram", label: "Telegram" },
+                        { value: "sms", label: "SMS" },
+                      ].map((option) => {
+                        const checked =
+                          formData.notificationChannels?.includes(
+                            option.value as "whatsapp" | "telegram" | "sms",
+                          ) || false;
+                        return (
+                          <label
+                            key={option.value}
+                            className={`inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition ${
+                              checked
+                                ? "border-sky-500 bg-sky-50 text-slate-900"
+                                : "border-slate-200 bg-white text-slate-700 hover:border-sky-300"
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={(e) =>
+                                toggleNotificationChannel(
+                                  option.value as
+                                    | "whatsapp"
+                                    | "telegram"
+                                    | "sms",
+                                  e.target.checked,
+                                )
+                              }
+                              className="sr-only"
+                            />
+                            <span
+                              aria-hidden
+                              className={`flex h-4 w-4 items-center justify-center rounded-sm border text-white ${
+                                checked
+                                  ? "border-sky-600 bg-sky-600"
+                                  : "border-slate-300 bg-white text-transparent"
+                              }`}
+                            >
+                              <svg
+                                viewBox="0 0 20 20"
+                                className="h-3 w-3"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth={2.3}
+                              >
+                                <path
+                                  d="M5 11l3 3 7-8"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
+                            </span>
+                            {option.label}
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </section>
               </div>
 
               <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold text-slate-900">
+                    Ваш репетитор
+                  </h3>
+                  {selectedTutor && (
+                    <span className="text-xs font-semibold text-slate-500">
+                      рекомендован сервисом
+                    </span>
+                  )}
+                </div>
                 {selectedTutor ? (
                   <TutorCard
                     tutor={selectedTutor}
                     isRecommended
                     tone="flat"
+                    badgeLabel="рекомендован сервисом"
                     onChangeClick={
                       canSwitchTutor
                         ? () => setShowTutorList((prev) => !prev)
@@ -415,7 +647,7 @@ export default function CheckoutPage() {
                 </h3>
                 <p className="text-sm text-slate-500">
                   {selectedTutor
-                    ? "Точные дату и время первого урока вы сможете выбрать на следующем шаге."
+                    ? `Мы зарезервируем ${selectedTutor.name} сразу после оплаты.`
                     : "После оплаты координатор подберёт преподавателя по вашим ответам."}
                 </p>
               </div>
@@ -502,26 +734,27 @@ export default function CheckoutPage() {
                 </div>
               )}
 
-              {(!hasRequiredQuizData || errors.prerequisite) && (
-                <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-                  {errors.prerequisite ||
-                    "Заполните класс и предмет на предыдущих шагах, чтобы продолжить."}
-                </div>
-              )}
-
               <button
                 type="button"
                 onClick={handleSubmit}
                 disabled={isSubmitDisabled}
                 className={`w-full rounded-full px-8 py-4 text-base font-semibold text-white shadow-lg transition-all ${
                   isSubmitDisabled
-                    ? "cursor-not-allowed bg-slate-400"
+                    ? "cursor-not-allowed bg-slate-400 opacity-80"
                     : "bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 hover:shadow-xl hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                 }`}
               >
-                {primaryCtaLabel}
+                {isLoading
+                  ? "Отправляем…"
+                  : isSuccess
+                    ? "Заявка отправлена"
+                    : "Подтвердить запись и перейти к оплате"}
               </button>
 
+              <p className="text-center text-xs text-slate-500">
+                Вы сможете бесплатно перенести или отменить пробный урок, если
+                предупредите минимум за 12 часов.
+              </p>
               <p className="text-center text-xs text-slate-500">
                 Соглашаясь, вы принимаете условия оказания услуг, правила отмены
                 занятий и обработку персональных данных.
@@ -679,10 +912,14 @@ function getFallbackPriceRange(range?: QuizFormData["priceRange"]) {
     budget: { min: 900, max: 1200 },
     medium: { min: 1200, max: 1700 },
     premium: { min: 1800, max: 2500 },
+    any: { min: 900, max: 2500 },
   } as const;
 
   const normalized: keyof typeof prices =
-    range === "budget" || range === "medium" || range === "premium"
+    range === "budget" ||
+    range === "medium" ||
+    range === "premium" ||
+    range === "any"
       ? range
       : "medium";
 

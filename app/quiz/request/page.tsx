@@ -9,13 +9,27 @@ import {
   type QuizFormData,
 } from "@/lib/quiz-state";
 
+const EXPERIENCE_COMMENT_LIMIT = 500;
+
 export default function RequestPage() {
   const router = useRouter();
   const [formData, setFormData] = useState<QuizFormData>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [attempted, setAttempted] = useState(false);
 
   useEffect(() => {
-    setFormData(getQuizState());
+    const state = getQuizState();
+    const normalized =
+      state.priceRange === "all"
+        ? {
+            ...state,
+            priceRange: "any",
+          }
+        : state;
+    setFormData({
+      lessonType: "individual",
+      ...normalized,
+    });
   }, []);
 
   const updateField = (field: keyof QuizFormData, value: any) => {
@@ -35,9 +49,6 @@ export default function RequestPage() {
   const validate = (): Record<string, string> => {
     const nextErrors: Record<string, string> = {};
 
-    if (!formData.lessonType) {
-      nextErrors.lessonType = "Выберите вид занятий";
-    }
     if (!formData.grade) {
       nextErrors.grade = "Выберите класс";
     }
@@ -51,7 +62,7 @@ export default function RequestPage() {
       nextErrors.goals = "Выберите хотя бы одну цель";
     }
     if (!formData.priceRange) {
-      nextErrors.priceRange = "Выберите диапазон стоимости";
+      nextErrors.priceRange = "Пожалуйста, выберите вариант стоимости";
     }
 
     setErrors(nextErrors);
@@ -59,6 +70,7 @@ export default function RequestPage() {
   };
 
   const handleNext = () => {
+    setAttempted(true);
     const validationErrors = validate();
     if (Object.keys(validationErrors).length === 0) {
       router.push("/quiz/tutor");
@@ -127,24 +139,95 @@ export default function RequestPage() {
 
   const priceRanges = [
     {
-      value: "budget",
+      value: "budget" as const,
       title: "Недорогие занятия",
-      description: "Подойдут начинающие репетиторы и студенты старших курсов.",
-      price: "от 900–1200 ₽ за онлайн-урок",
+      description: "от ~900–1200 ₽ · студенты и начинающие преподы",
+      hint: "Базовые задачи, спокойный темп",
     },
     {
-      value: "medium",
-      title: "Средний уровень",
-      description: "Опытные преподаватели с хорошими отзывами.",
-      price: "от 1200–1700 ₽ за онлайн-урок",
+      value: "medium" as const,
+      title: "Оптимальный баланс",
+      description: "от ~1200–1700 ₽ · опытные преподаватели",
+      hint: "Лучшее соотношение цены и результатов",
     },
     {
-      value: "premium",
+      value: "premium" as const,
       title: "Максимальный результат",
-      description: "Эксперты по ОГЭ/ЕГЭ, сильный опыт и результаты учеников.",
-      price: "от 1800–2500 ₽ за онлайн-урок",
+      description: "от ~1800–2500 ₽ · эксперты по ОГЭ/ЕГЭ",
+      hint: "Сложные задачи и высокий темп",
+    },
+    {
+      value: "any" as const,
+      title: "Рассмотреть все варианты",
+      description: "Покажем подходящих в разных ценовых диапазонах",
+      hint: "Рекомендуем, что лучше под задачи",
     },
   ];
+
+  const renderRadio = (checked: boolean) => (
+    <span
+      aria-hidden
+      className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-colors ${
+        checked ? "border-sky-600 bg-sky-50" : "border-slate-300 bg-white"
+      }`}
+    >
+      <span
+        className={`h-2.5 w-2.5 rounded-full transition ${
+          checked ? "bg-sky-600" : "bg-transparent"
+        }`}
+      />
+    </span>
+  );
+
+  const renderCheckbox = (checked: boolean) => (
+    <span
+      aria-hidden
+      className={`flex h-5 w-5 items-center justify-center rounded-md border-2 text-white transition ${
+        checked
+          ? "border-sky-600 bg-sky-600"
+          : "border-slate-300 bg-white text-transparent"
+      }`}
+    >
+      <svg
+        className="h-3.5 w-3.5"
+        viewBox="0 0 20 20"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2.3}
+      >
+        <path d="M5 11l3 3 7-8" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </span>
+  );
+
+  const cardBase = (active: boolean, hasError?: boolean) =>
+    `flex cursor-pointer items-start gap-3 rounded-xl border-2 p-4 text-left transition-all ${
+      active
+        ? "border-sky-600 bg-sky-50 shadow-sm"
+        : "border-slate-200 bg-white hover:border-sky-300 hover:bg-sky-50/60"
+    } ${hasError ? "ring-1 ring-red-200" : ""}`;
+
+  const checkboxCardBase = (active: boolean) =>
+    `flex cursor-pointer items-start gap-3 rounded-xl border-2 p-4 text-left transition-all ${
+      active
+        ? "border-sky-600 bg-sky-50 shadow-sm"
+        : "border-slate-200 bg-white hover:border-sky-300 hover:bg-sky-50/60"
+    }`;
+
+  const blockSurface = (hasError?: boolean) =>
+    `rounded-2xl border p-5 md:p-6 ${
+      hasError
+        ? "border-red-300 bg-red-50/60 shadow-[0_10px_25px_rgba(248,113,113,0.12)]"
+        : "border-slate-200 bg-white"
+    }`;
+
+  const isNextDisabled =
+    !formData.grade ||
+    !formData.subject ||
+    (formData.subject === "Другое" && !formData.subjectOther?.trim()) ||
+    !formData.goals ||
+    formData.goals.length === 0 ||
+    !formData.priceRange;
 
   return (
     <QuizLayout>
@@ -159,51 +242,30 @@ export default function RequestPage() {
           </p>
         </div>
 
-        {/* Блок 1: Тип занятий */}
-        <div id="lessonType">
-          <h2 className="text-xl font-bold text-slate-900 mb-4">Вид занятий</h2>
-          <div className="grid gap-3 sm:grid-cols-3">
-            {[
-              { value: "individual", label: "Индивидуальные" },
-              { value: "mini-group", label: "Мини-группа 2–3 человека" },
-              { value: "not-sure", label: "Пока не знаю, подберите вариант" },
-            ].map((option) => (
-              <label
-                key={option.value}
-                className={`flex cursor-pointer items-center justify-center gap-3 rounded-xl border-2 p-4 text-center transition-all ${
-                  formData.lessonType === option.value
-                    ? "border-sky-500 bg-sky-50"
-                    : "border-slate-200 bg-white hover:border-sky-300 hover:bg-sky-50/50"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="lessonType"
-                  value={option.value}
-                  checked={formData.lessonType === option.value}
-                  onChange={(e) => updateField("lessonType", e.target.value)}
-                  className="sr-only"
-                />
-                <span className="text-sm font-medium text-slate-700">
-                  {option.label}
-                </span>
-              </label>
-            ))}
-          </div>
-          {errors.lessonType && (
-            <p className="mt-2 text-sm text-red-600">{errors.lessonType}</p>
+        {/* Блок 1: Ребёнок и предмет */}
+        <div
+          id="grade"
+          className={blockSurface(
+            Boolean(errors.grade || errors.subject || errors.subjectOther),
           )}
-        </div>
-
-        {/* Блок 2: Ребёнок и предмет */}
-        <div id="grade">
-          <h2 className="text-xl font-bold text-slate-900 mb-4">
-            Ребёнок и предмет
-          </h2>
+        >
+          <div className="mb-4 flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-xl font-bold text-slate-900">
+                Ребёнок и предмет
+              </h2>
+              <p className="text-sm text-slate-500">Оба поля обязательны</p>
+            </div>
+            {(errors.grade || errors.subject || errors.subjectOther) && (
+              <p className="text-sm font-medium text-red-600">
+                Заполните обязательные поля
+              </p>
+            )}
+          </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Класс ребёнка
+                Класс ребёнка *
               </label>
               <select
                 id="grade-select"
@@ -235,7 +297,7 @@ export default function RequestPage() {
                 htmlFor="subject-select"
                 className="block text-sm font-semibold text-slate-700 mb-2"
               >
-                Предмет
+                Предмет *
               </label>
               <select
                 id="subject-select"
@@ -286,7 +348,7 @@ export default function RequestPage() {
               {formData.subject === "Другое" && (
                 <div className="mt-4">
                   <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Уточните предмет
+                    Уточните предмет *
                   </label>
                   <input
                     id="subjectOther"
@@ -310,13 +372,20 @@ export default function RequestPage() {
         </div>
 
         {/* Блок 3: Что хотите улучшить */}
-        <div id="goals">
-          <h2 className="text-xl font-bold text-slate-900 mb-2">
-            Что хотите улучшить в первую очередь?
-          </h2>
-          <p className="text-sm text-slate-500 mb-4">
-            Можно выбрать несколько вариантов.
-          </p>
+        <div id="goals" className={blockSurface(Boolean(errors.goals))}>
+          <div className="mb-2 flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-xl font-bold text-slate-900">
+                Что хотите улучшить в первую очередь?
+              </h2>
+              <p className="text-sm text-slate-500">
+                Можно выбрать несколько вариантов. Обязательно.
+              </p>
+            </div>
+            {errors.goals && (
+              <p className="text-sm font-medium text-red-600">{errors.goals}</p>
+            )}
+          </div>
           <div className="space-y-6">
             {goalsGroups.map((group) => (
               <div key={group.title}>
@@ -324,45 +393,41 @@ export default function RequestPage() {
                   {group.title}
                 </h3>
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {group.options.map((option) => (
-                    <label
-                      key={option.value}
-                      className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 p-4 transition-all ${
-                        formData.goals?.includes(option.value)
-                          ? "border-sky-500 bg-sky-50"
-                          : "border-slate-200 bg-white hover:border-slate-300"
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={
-                          formData.goals?.includes(option.value) || false
-                        }
-                        onChange={(e) => {
-                          const current = formData.goals || [];
-                          const updated = e.target.checked
-                            ? [...current, option.value]
-                            : current.filter((v) => v !== option.value);
-                          updateField("goals", updated);
-                        }}
-                        className="h-4 w-4 text-sky-500 focus:ring-2 focus:ring-sky-500"
-                      />
-                      <span className="text-sm font-medium text-slate-700">
-                        {option.label}
-                      </span>
-                    </label>
-                  ))}
+                  {group.options.map((option) => {
+                    const isChecked =
+                      formData.goals?.includes(option.value) || false;
+                    return (
+                      <label
+                        key={option.value}
+                        className={checkboxCardBase(isChecked)}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={(e) => {
+                            const current = formData.goals || [];
+                            const updated = e.target.checked
+                              ? [...current, option.value]
+                              : current.filter((v) => v !== option.value);
+                            updateField("goals", updated);
+                          }}
+                          className="sr-only"
+                        />
+                        {renderCheckbox(isChecked)}
+                        <span className="text-sm font-medium text-slate-800">
+                          {option.label}
+                        </span>
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
             ))}
           </div>
-          {errors.goals && (
-            <p className="mt-2 text-sm text-red-600">{errors.goals}</p>
-          )}
         </div>
 
         {/* Блок 4: С чем сейчас сложнее всего */}
-        <div>
+        <div className={blockSurface()}>
           <h2 className="text-xl font-bold text-slate-900 mb-2">
             С чем сейчас сложнее всего?
           </h2>
@@ -370,34 +435,33 @@ export default function RequestPage() {
             Поможет лучше подобрать формат и темп занятий.
           </p>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {difficulties.map((difficulty) => (
-              <label
-                key={difficulty.value}
-                className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 p-4 transition-all ${
-                  formData.difficulties?.includes(difficulty.value)
-                    ? "border-sky-500 bg-sky-50"
-                    : "border-slate-200 bg-white hover:border-slate-300"
-                }`}
-              >
-                <input
-                  type="checkbox"
-                  checked={
-                    formData.difficulties?.includes(difficulty.value) || false
-                  }
-                  onChange={(e) => {
-                    const current = formData.difficulties || [];
-                    const updated = e.target.checked
-                      ? [...current, difficulty.value]
-                      : current.filter((v) => v !== difficulty.value);
-                    updateField("difficulties", updated);
-                  }}
-                  className="h-4 w-4 text-sky-500 focus:ring-2 focus:ring-sky-500"
-                />
-                <span className="text-sm font-medium text-slate-700">
-                  {difficulty.label}
-                </span>
-              </label>
-            ))}
+            {difficulties.map((difficulty) => {
+              const isChecked =
+                formData.difficulties?.includes(difficulty.value) || false;
+              return (
+                <label
+                  key={difficulty.value}
+                  className={checkboxCardBase(isChecked)}
+                >
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={(e) => {
+                      const current = formData.difficulties || [];
+                      const updated = e.target.checked
+                        ? [...current, difficulty.value]
+                        : current.filter((v) => v !== difficulty.value);
+                      updateField("difficulties", updated);
+                    }}
+                    className="sr-only"
+                  />
+                  {renderCheckbox(isChecked)}
+                  <span className="text-sm font-medium text-slate-800">
+                    {difficulty.label}
+                  </span>
+                </label>
+              );
+            })}
           </div>
           {formData.difficulties?.includes("other") && (
             <div className="mt-4">
@@ -413,15 +477,18 @@ export default function RequestPage() {
         </div>
 
         {/* Блок 5: Опыт с репетиторами */}
-        <div>
-          <h2 className="text-xl font-bold text-slate-900 mb-4">
-            С кем уже занимались?
-          </h2>
+        <div className={blockSurface()}>
+          <div className="mb-4">
+            <h2 className="text-xl font-bold text-slate-900">
+              Уже занимались с репетитором?
+            </h2>
+            <p className="text-sm text-slate-500">Выберите один вариант.</p>
+          </div>
           <div className="space-y-3">
             {[
               {
                 value: "never",
-                label: "Никогда не занимались с репетиторами",
+                label: "Никогда не занимались",
               },
               {
                 value: "before",
@@ -429,118 +496,131 @@ export default function RequestPage() {
               },
               {
                 value: "current",
-                label: "Сейчас занимаемся, но думаем о замене",
+                label: "Сейчас занимаемся, думаем о замене",
               },
-            ].map((option) => (
-              <label
-                key={option.value}
-                className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 p-4 transition-all ${
-                  formData.tutorExperience === option.value
-                    ? "border-sky-500 bg-sky-50"
-                    : "border-slate-200 bg-white hover:border-slate-300"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="tutorExperience"
-                  value={option.value}
-                  checked={formData.tutorExperience === option.value}
-                  onChange={(e) =>
-                    updateField("tutorExperience", e.target.value)
-                  }
-                  className="h-4 w-4 text-sky-500 focus:ring-2 focus:ring-sky-500"
-                />
-                <span className="text-sm font-medium text-slate-700">
-                  {option.label}
-                </span>
-              </label>
-            ))}
+            ].map((option) => {
+              const isChecked = formData.tutorExperience === option.value;
+              return (
+                <label key={option.value} className={cardBase(isChecked)}>
+                  <input
+                    type="radio"
+                    name="tutorExperience"
+                    value={option.value}
+                    checked={isChecked}
+                    onChange={(e) =>
+                      updateField("tutorExperience", e.target.value)
+                    }
+                    className="sr-only"
+                  />
+                  {renderRadio(isChecked)}
+                  <span className="text-sm font-semibold text-slate-800">
+                    {option.label}
+                  </span>
+                </label>
+              );
+            })}
           </div>
           {(formData.tutorExperience === "before" ||
             formData.tutorExperience === "current") && (
-            <div className="mt-4">
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Что понравилось / не понравилось?
+            <div className="mt-5 space-y-2">
+              <label className="block text-sm font-semibold text-slate-700">
+                Расскажите о прежних занятиях (что было удобно/неудобно)
               </label>
               <textarea
                 value={formData.tutorExperienceComment || ""}
-                onChange={(e) =>
-                  updateField("tutorExperienceComment", e.target.value)
-                }
-                placeholder="Например: ребёнок стеснялся, было слишком быстро, не видели прогресса…"
-                rows={3}
+                onChange={(e) => {
+                  const value = e.target.value.slice(
+                    0,
+                    EXPERIENCE_COMMENT_LIMIT,
+                  );
+                  updateField("tutorExperienceComment", value);
+                }}
+                placeholder="Например: ребёнок стеснялся, было слишком быстро, не видел прогресса…"
+                rows={4}
+                maxLength={EXPERIENCE_COMMENT_LIMIT}
                 className="w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3 text-base outline-none transition-all focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 resize-none"
               />
+              <div className="flex items-center justify-between text-xs text-slate-500">
+                <span>
+                  Необязательно. До {EXPERIENCE_COMMENT_LIMIT} символов.
+                </span>
+                <span>
+                  {(formData.tutorExperienceComment || "").length} /{" "}
+                  {EXPERIENCE_COMMENT_LIMIT}
+                </span>
+              </div>
             </div>
           )}
         </div>
 
         {/* Блок 6: Предпочтения по стоимости */}
-        <div id="priceRange">
-          <h2 className="text-xl font-bold text-slate-900 mb-2">
-            Предпочтения по стоимости занятия
-          </h2>
-          <p className="text-sm text-slate-500 mb-4">
-            Диапазоны помогут подобрать подходящих преподавателей.
-          </p>
-          <div className="grid gap-4 sm:grid-cols-3">
-            {priceRanges.map((range) => (
-              <label
-                key={range.value}
-                className={`flex cursor-pointer flex-col rounded-xl border-2 p-5 transition-all ${
-                  formData.priceRange === range.value
-                    ? "border-sky-500 bg-sky-50"
-                    : "border-slate-200 bg-white hover:border-sky-300 hover:bg-sky-50/50"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="priceRange"
-                  value={range.value}
-                  checked={formData.priceRange === range.value}
-                  onChange={(e) => updateField("priceRange", e.target.value)}
-                  className="sr-only"
-                />
-                <h3 className="text-base font-bold text-slate-900 mb-2">
-                  {range.title}
-                </h3>
-                <p className="text-sm text-slate-600 mb-3">
-                  {range.description}
-                </p>
-                <p className="text-sm font-semibold text-sky-600 mt-auto">
-                  {range.price}
-                </p>
-              </label>
-            ))}
+        <div
+          id="priceRange"
+          className={blockSurface(Boolean(errors.priceRange))}
+        >
+          <div className="mb-3 flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-xl font-bold text-slate-900">
+                Предпочтения по стоимости занятия
+              </h2>
+              <p className="text-sm text-slate-500">
+                Выберите один вариант (обязательно).
+              </p>
+            </div>
+            {errors.priceRange && (
+              <p className="text-sm font-medium text-red-600">
+                {errors.priceRange}
+              </p>
+            )}
           </div>
-          <div className="mt-4">
-            <label className="flex cursor-pointer items-center gap-3 rounded-xl border-2 border-slate-200 bg-white p-4 transition-all hover:border-sky-300">
-              <input
-                type="checkbox"
-                checked={formData.priceRange === "all"}
-                onChange={(e) =>
-                  updateField(
-                    "priceRange",
-                    e.target.checked ? "all" : undefined,
-                  )
-                }
-                className="h-4 w-4 text-sky-500 focus:ring-2 focus:ring-sky-500"
-              />
-              <span className="text-sm font-medium text-slate-700">
-                Рассмотрите все варианты
-              </span>
-            </label>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
+            {priceRanges.map((range) => {
+              const isChecked = formData.priceRange === range.value;
+              return (
+                <label
+                  key={range.value}
+                  className={cardBase(
+                    isChecked,
+                    attempted && Boolean(errors.priceRange),
+                  )}
+                >
+                  <input
+                    type="radio"
+                    name="priceRange"
+                    value={range.value}
+                    checked={isChecked}
+                    onChange={(e) => updateField("priceRange", e.target.value)}
+                    className="sr-only"
+                  />
+                  {renderRadio(isChecked)}
+                  <div className="space-y-1">
+                    <h3 className="text-base font-bold text-slate-900">
+                      {range.title}
+                    </h3>
+                    <p className="text-sm text-slate-700">
+                      {range.description}
+                    </p>
+                    <p className="text-xs font-semibold text-slate-500">
+                      {range.hint}
+                    </p>
+                  </div>
+                </label>
+              );
+            })}
           </div>
-          {errors.priceRange && (
-            <p className="mt-2 text-sm text-red-600">{errors.priceRange}</p>
-          )}
         </div>
 
         {/* CTA */}
         <div className="pt-6 border-t border-slate-200">
           <button
+            type="button"
+            aria-disabled={isNextDisabled}
             onClick={handleNext}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-sky-500 to-cyan-500 px-8 py-3.5 text-base font-semibold text-white shadow-lg transition-all hover:from-sky-600 hover:to-cyan-600 hover:shadow-xl hover:scale-105 active:scale-100"
+            className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full px-8 py-3.5 text-base font-semibold text-white shadow-lg transition-all ${
+              isNextDisabled
+                ? "cursor-not-allowed bg-slate-300 opacity-70"
+                : "bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 hover:shadow-xl hover:scale-105 active:scale-100"
+            }`}
           >
             Далее
             <svg

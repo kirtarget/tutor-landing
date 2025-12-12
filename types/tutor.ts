@@ -24,3 +24,4 @@ export type TutorCard = {
   gender: "male" | "female";
   avatarTheme: "blue" | "green" | "orange" | "purple";
 };
+

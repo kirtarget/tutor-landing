@@ -12,7 +12,7 @@ export type QuizFormData = {
   difficultyOther?: string;
   tutorExperience?: "never" | "before" | "current";
   tutorExperienceComment?: string;
-  priceRange?: "budget" | "medium" | "premium" | "all";
+  priceRange?: "budget" | "medium" | "premium" | "all" | "any";
 
   // Страница 2 - Репетитор
   tutorGender?: "any" | "female" | "male";
@@ -31,6 +31,7 @@ export type QuizFormData = {
   parentPhone?: string;
   parentEmail?: string;
   notificationsEnabled?: boolean;
+  notificationChannels?: ("whatsapp" | "telegram" | "sms")[];
   preferredTime?: string;
   paymentMethod?: "card-rf" | "card-other" | "no-card";
   promoCode?: string;
