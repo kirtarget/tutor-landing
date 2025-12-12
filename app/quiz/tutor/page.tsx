@@ -69,7 +69,7 @@ export default function TutorPage() {
         any: "any",
       };
 
-      const suggestedPrice = priceMap[value];
+      const suggestedPrice = priceMap[value as keyof typeof priceMap];
       if (suggestedPrice) {
         updated.priceRange = suggestedPrice;
       }
@@ -196,14 +196,14 @@ export default function TutorPage() {
     let priceRange = formData.priceRange;
 
     if (formData.tutorTeachingExperience && !priceRange) {
-      const experienceToPrice: Record<string, string> = {
+      const experienceToPrice: Record<string, QuizFormData["priceRange"]> = {
         beginner: "budget",
         "3-5": formData.tutorOgeEgeExpert ? "premium" : "medium",
         "5+": "premium",
         any: "any",
       };
       priceRange =
-        experienceToPrice[formData.tutorTeachingExperience] || priceRange;
+        experienceToPrice[formData.tutorTeachingExperience] ?? priceRange;
     } else if (formData.tutorTeachingExperience === "3-5" && priceRange) {
       // Обновляем стоимость на основе галочки экспертов
       if (formData.tutorOgeEgeExpert && priceRange !== "premium") {

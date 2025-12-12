@@ -1,10 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 export default function CabinetPage() {
+  return (
+    <Suspense fallback={<CabinetLoading />}>
+      <CabinetContent />
+    </Suspense>
+  );
+}
+
+function CabinetLoading() {
+  return (
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="animate-pulse text-slate-400">Загрузка...</div>
+    </div>
+  );
+}
+
+function CabinetContent() {
   const params = useSearchParams();
   const [stored, setStored] = useState<{
     tutor?: string | null;
