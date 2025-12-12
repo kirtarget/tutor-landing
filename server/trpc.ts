@@ -20,6 +20,15 @@ const quizInputSchema = z.object({
   timeSlots: z.array(z.string()).optional(),
   style: z.string().optional(),
   comment: z.string().optional(),
+  notifications: z.array(z.string()).optional(),
+  email: z.string().optional(),
+  bookingDate: z.string().optional(),
+  bookingTime: z.string().optional(),
+  bookingStartAt: z.string().optional(),
+  tutorName: z.string().optional(),
+  tutorPrice: z.number().optional(),
+  tutorSubject: z.string().optional(),
+  selectedTutorId: z.string().optional(),
 });
 
 export type QuizInput = z.infer<typeof quizInputSchema>;
@@ -49,6 +58,15 @@ async function sendQuizToTelegram(input: QuizInput) {
     timeSlots = [],
     style,
     comment,
+    notifications = [],
+    bookingDate,
+    bookingTime,
+    bookingStartAt,
+    tutorName,
+    tutorPrice,
+    tutorSubject,
+    selectedTutorId,
+    email,
   } = input;
 
   // Расшифровка значений
@@ -85,6 +103,7 @@ async function sendQuizToTelegram(input: QuizInput) {
     "👤 Контакты:",
     `   Имя: ${name}`,
     `   Телефон: ${phone}`,
+    `   Email: ${email || "—"}`,
     "",
     "📚 Информация об ученике:",
     `   Класс: ${grade}`,
@@ -101,9 +120,30 @@ async function sendQuizToTelegram(input: QuizInput) {
         : "—"
     }`,
     "",
+    "🗓 Бронирование:",
+    `   Дата: ${bookingDate || "—"}`,
+    `   Время: ${bookingTime || "—"}`,
+    `   ISO: ${bookingStartAt || "—"}`,
+    "   Длительность: 30 минут (пробный)",
+    "",
     "👨‍🏫 Стиль преподавателя:",
     `   ${style || "—"}`,
   ];
+
+  if (tutorName || tutorPrice) {
+    lines.push(
+      "",
+      "📘 Репетитор:",
+      `   ${tutorName || "Не выбран"}`,
+      tutorPrice ? `   Цена: ${tutorPrice} ₽` : "   Цена: —",
+      tutorSubject ? `   Предмет: ${tutorSubject}` : "",
+      selectedTutorId ? `   ID: ${selectedTutorId}` : "",
+    );
+  }
+
+  if (notifications.length) {
+    lines.push("", "🔔 Напоминания:", `   ${notifications.join(", ")}`);
+  }
 
   if (comment) {
     lines.push("", "💬 Комментарий:", `   ${comment}`);

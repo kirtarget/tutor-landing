@@ -25,3 +25,4 @@ export type TutorCard = {
   avatarTheme: "blue" | "green" | "orange" | "purple";
 };
 
+

@@ -2,6 +2,12 @@
 "use client";
 
 export type QuizFormData = {
+  booking?: {
+    dateISO: string;
+    time: string;
+    startAtISO?: string;
+  };
+  selectedTutorId?: string;
   // Страница 1 - Запрос
   lessonType?: "individual" | "mini-group" | "not-sure";
   grade?: string;
@@ -12,7 +18,7 @@ export type QuizFormData = {
   difficultyOther?: string;
   tutorExperience?: "never" | "before" | "current";
   tutorExperienceComment?: string;
-  priceRange?: "budget" | "medium" | "premium" | "all" | "any";
+  priceRange?: "budget" | "medium" | "premium" | "all";
 
   // Страница 2 - Репетитор
   tutorGender?: "any" | "female" | "male";
@@ -26,7 +32,7 @@ export type QuizFormData = {
   lessonLanguageOther?: string;
   additionalComment?: string;
 
-  // Страница 3 - Запись и оплата
+  // Страница 3 - Запись
   parentName?: string;
   parentPhone?: string;
   parentEmail?: string;

@@ -10,7 +10,7 @@ interface QuizLayoutProps {
 const steps = [
   { id: "request", label: "Запрос", path: "/quiz/request" },
   { id: "tutor", label: "Репетитор", path: "/quiz/tutor" },
-  { id: "checkout", label: "Запись и оплата", path: "/quiz/checkout" },
+  { id: "checkout", label: "Запись", path: "/quiz/checkout" },
 ];
 
 export function QuizLayout({ children }: QuizLayoutProps) {

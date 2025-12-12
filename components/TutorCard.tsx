@@ -9,6 +9,8 @@ type TutorCardProps = {
   onChangeClick?: () => void;
   tone?: "raised" | "flat";
   badgeLabel?: string;
+  showFreeTrial?: boolean;
+  trialDurationMinutes?: number;
 };
 
 export const TutorCard: React.FC<TutorCardProps> = ({
@@ -16,7 +18,9 @@ export const TutorCard: React.FC<TutorCardProps> = ({
   isRecommended = false,
   onChangeClick,
   tone = "raised",
-  badgeLabel = "Рекомендован",
+  badgeLabel,
+  showFreeTrial = false,
+  trialDurationMinutes = 30,
 }) => {
   const {
     name,
@@ -91,21 +95,41 @@ export const TutorCard: React.FC<TutorCardProps> = ({
           )}
 
           <div className="flex items-baseline justify-between rounded-2xl bg-slate-50 px-4 py-3">
-            <div className="flex flex-col">
+            <div className="flex flex-col gap-1">
               <span className="text-[11px] uppercase tracking-wide text-slate-500">
                 Стоимость онлайн-урока
               </span>
-              <span className="text-lg font-semibold text-slate-900">
-                {priceFormatted} ₽
-              </span>
+              {showFreeTrial ? (
+                <div className="flex items-baseline gap-2">
+                  <span className="text-base font-semibold text-slate-500 line-through">
+                    {priceFormatted} ₽
+                  </span>
+                  <span className="text-xl font-extrabold text-emerald-600">
+                    Бесплатно
+                  </span>
+                </div>
+              ) : (
+                <span className="text-lg font-semibold text-slate-900">
+                  {priceFormatted} ₽
+                </span>
+              )}
             </div>
             <span className="text-[11px] text-slate-500">
-              50–60 минут · оплата через сервис
+              {showFreeTrial
+                ? `Пробный урок · ${trialDurationMinutes} минут`
+                : "30 минут · онлайн"}
             </span>
           </div>
-          <p className="text-[11px] text-slate-500">
-            Стоимость пробного урока такая же, как обычного занятия.
-          </p>
+          {showFreeTrial ? (
+            <p className="text-[11px] text-slate-600">
+              Пробный урок бесплатный и длится {trialDurationMinutes} минут.
+              После бронирования координатор свяжется с вами.
+            </p>
+          ) : (
+            <p className="text-[11px] text-slate-500">
+              Стоимость пробного урока такая же, как обычного занятия.
+            </p>
+          )}
 
           {onChangeClick && (
             <button
@@ -128,7 +152,7 @@ type TutorPhotoProps = {
   grades: TutorCardType["grades"];
   theme: TutorCardType["avatarTheme"];
   showBadge: boolean;
-  badgeLabel: string;
+  badgeLabel?: string;
 };
 
 const TutorPhoto: React.FC<TutorPhotoProps> = ({
@@ -152,8 +176,8 @@ const TutorPhoto: React.FC<TutorPhotoProps> = ({
       className={`relative overflow-hidden rounded-[28px] bg-gradient-to-br ${palette.bg} px-6 pb-6 pt-6 text-white`}
     >
       {showBadge && (
-        <span className="absolute left-6 top-6 inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold tracking-wide text-white">
-          {badgeLabel}
+        <span className="absolute left-6 top-6 inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white">
+          {badgeLabel || "Рекомендован"}
         </span>
       )}
 
