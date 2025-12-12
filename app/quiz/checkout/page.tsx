@@ -68,7 +68,12 @@ export default function CheckoutPage() {
   }, [formData.grade, formData.subject]);
 
   useEffect(() => {
-    const answers = mapQuizToAnswers(formData);
+    const mergedState: QuizFormData = {
+      ...persistedStateRef.current,
+      ...formData,
+    };
+
+    const answers = mapQuizToAnswers(mergedState);
     const matched = matchTutors(answers, 10);
     setRecommendations(matched);
     setSelectedTutorId((current) => {

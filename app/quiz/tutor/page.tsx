@@ -17,8 +17,20 @@ export default function TutorPage() {
 
   useEffect(() => {
     const state = getQuizState();
-    const normalizedPrice =
-      state.priceRange === "all" ? ("any" as const) : state.priceRange;
+    const normalizedPrice: QuizFormData["priceRange"] =
+      state.priceRange === "all" ? "any" : state.priceRange;
+
+    const experienceMap: Record<
+      Exclude<QuizFormData["priceRange"], undefined>,
+      QuizFormData["tutorTeachingExperience"]
+    > = {
+      budget: "beginner",
+      medium: "3-5",
+      premium: "5+",
+      any: "any",
+      all: "any",
+    };
+
     const normalized: QuizFormData = {
       ...state,
       priceRange: normalizedPrice,
@@ -30,16 +42,9 @@ export default function TutorPage() {
 
     // Автоматически устанавливаем опыт преподавания на основе стоимости
     if (normalized.priceRange && !normalized.tutorTeachingExperience) {
-      const experienceMap: Record<string, string> = {
-        budget: "beginner",
-        medium: "3-5",
-        premium: "5+",
-        any: "any",
-      };
-
       const suggestedExperience = experienceMap[normalized.priceRange];
       if (suggestedExperience) {
-        const updated = {
+        const updated: QuizFormData = {
           ...normalized,
           tutorTeachingExperience: suggestedExperience,
         };
@@ -54,7 +59,10 @@ export default function TutorPage() {
 
     // При изменении опыта преподавания обновляем стоимость
     if (field === "tutorTeachingExperience") {
-      const priceMap: Record<string, string> = {
+      const priceMap: Record<
+        Exclude<QuizFormData["tutorTeachingExperience"], undefined>,
+        QuizFormData["priceRange"]
+      > = {
         beginner: "budget",
         "3-5": "medium",
         "5+": "premium",
@@ -63,7 +71,7 @@ export default function TutorPage() {
 
       const suggestedPrice = priceMap[value];
       if (suggestedPrice) {
-        updated.priceRange = suggestedPrice as any;
+        updated.priceRange = suggestedPrice;
       }
 
       // Если выбран не "3-5" и не "5+", сбрасываем галочку экспертов

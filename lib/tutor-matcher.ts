@@ -52,10 +52,13 @@ export function mapQuizToAnswers(formData: QuizFormData): QuizAnswers {
     formData.subject === "Другое"
       ? formData.subjectOther?.trim()
       : formData.subject?.trim();
+  const normalizedSubject =
+    normalizeSubject(formData.subject, formData.subjectOther) ||
+    normalizeSubject(subjectLabel);
 
   return {
     grade: extractGrade(formData.grade),
-    subject: normalizeSubject(formData.subject, formData.subjectOther),
+    subject: normalizedSubject,
     subjectLabel: subjectLabel || undefined,
     goals: formData.goals || [],
     difficulties: formData.difficulties || [],
@@ -93,17 +96,38 @@ function applyFilters(
   answers: QuizAnswers,
 ): TutorCard[] {
   let result = allTutors;
-  const hasSubjectPreference = Boolean(answers.subjectLabel);
+  const subjectSlug =
+    answers.subject || normalizeSubject(answers.subjectLabel || undefined);
 
-  if (answers.subject) {
+  if (subjectSlug) {
     const bySubject = allTutors.filter(
-      (tutor) => tutor.subject === answers.subject,
+      (tutor) => tutor.subject === subjectSlug,
     );
-    if (bySubject.length) {
-      result = bySubject;
-    }
-  } else if (hasSubjectPreference) {
-    return [];
+    if (!bySubject.length) return [];
+    result = bySubject;
+  }
+
+  if (answers.pricePreference) {
+    result = result.filter(
+      (tutor) => tutor.priceSegment === answers.pricePreference,
+    );
+  }
+
+  if (answers.tutorGender && answers.tutorGender !== "any") {
+    result = result.filter((tutor) => tutor.gender === answers.tutorGender);
+  }
+
+  if (answers.tutorExperience && answers.tutorExperience !== "any") {
+    const desiredRank = experienceRank[answers.tutorExperience];
+    result = result.filter(
+      (tutor) => experienceRank[getTutorLevel(tutor)] >= desiredRank,
+    );
+  }
+
+  if (answers.stylePreferences?.length) {
+    result = result.filter((tutor) =>
+      answers.stylePreferences!.some((style) => tutor.styles.includes(style)),
+    );
   }
 
   if (answers.grade) {
@@ -223,13 +247,21 @@ function normalizeSubject(
   const normalizedCandidate = rawCandidate.toLowerCase();
 
   for (const [label, slug] of Object.entries(subjectMap)) {
-    if (label.toLowerCase() === normalizedCandidate) {
+    const normalizedLabel = label.toLowerCase();
+    if (
+      normalizedLabel === normalizedCandidate ||
+      normalizedLabel.includes(normalizedCandidate) ||
+      normalizedCandidate.includes(normalizedLabel)
+    ) {
       return slug;
     }
   }
 
   const slugMatch = Object.values(subjectMap).find(
-    (value) => value === normalizedCandidate,
+    (value) =>
+      value === normalizedCandidate ||
+      value.includes(normalizedCandidate) ||
+      normalizedCandidate.includes(value),
   );
   if (slugMatch) {
     return slugMatch;
