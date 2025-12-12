@@ -19,17 +19,16 @@ export default function RequestPage() {
 
   useEffect(() => {
     const state = getQuizState();
-    const normalized =
-      state.priceRange === "all"
-        ? {
-            ...state,
-            priceRange: "any",
-          }
-        : state;
-    setFormData({
-      lessonType: "individual",
-      ...normalized,
-    });
+    const normalizedPriceRange: QuizFormData["priceRange"] =
+      state.priceRange === "all" ? "any" : state.priceRange;
+
+    const normalized: QuizFormData = {
+      ...state,
+      priceRange: normalizedPriceRange,
+      lessonType: state.lessonType || "individual",
+    };
+
+    setFormData(normalized);
   }, []);
 
   const updateField = (field: keyof QuizFormData, value: any) => {
