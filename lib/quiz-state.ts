@@ -18,7 +18,7 @@ export type QuizFormData = {
   difficultyOther?: string;
   tutorExperience?: "never" | "before" | "current";
   tutorExperienceComment?: string;
-  priceRange?: "budget" | "medium" | "premium" | "all";
+  priceRange?: "budget" | "medium" | "premium" | "all" | "any";
 
   // Страница 2 - Репетитор
   tutorGender?: "any" | "female" | "male";

@@ -209,11 +209,17 @@ export default function CheckoutPage() {
       reminders?: string[];
     },
   ) => {
-    const payload = buildPayload(booking, contacts);
+    const reminders = (contacts.reminders || []).filter(
+      (v): v is "whatsapp" | "telegram" | "sms" =>
+        v === "whatsapp" || v === "telegram" || v === "sms",
+    );
+    const contactsTyped = { ...contacts, reminders };
+
+    const payload = buildPayload(booking, contactsTyped);
     submitQuizMutation.mutate(payload, {
       onSuccess: () => {
         clearQuizState();
-        persistCabinetData(booking, contacts);
+        persistCabinetData(booking, contactsTyped);
         const params = new URLSearchParams();
         params.set("date", booking.dateISO);
         params.set("time", booking.time);
