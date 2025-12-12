@@ -59,8 +59,12 @@ export default function TutorPage() {
 
     // При изменении опыта преподавания обновляем стоимость
     if (field === "tutorTeachingExperience") {
+      const typedValue = value as
+        | QuizFormData["tutorTeachingExperience"]
+        | undefined;
+
       const priceMap: Record<
-        Exclude<QuizFormData["tutorTeachingExperience"], undefined>,
+        NonNullable<QuizFormData["tutorTeachingExperience"]>,
         QuizFormData["priceRange"]
       > = {
         beginner: "budget",
@@ -69,7 +73,7 @@ export default function TutorPage() {
         any: "any",
       };
 
-      const suggestedPrice = priceMap[value];
+      const suggestedPrice = typedValue ? priceMap[typedValue] : undefined;
       if (suggestedPrice) {
         updated.priceRange = suggestedPrice;
       }
